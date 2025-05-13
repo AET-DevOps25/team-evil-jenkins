@@ -7,7 +7,7 @@
 
 | Student Name | Weekly Progress | Impediments | Promises (Next Week) | Comments |
 | :----------- | :-------------- | :---------- | :------------------- | :------- |
-| Student1     |                 |             |                      |          |
+| Igor         | Participated in creating and choosing the idea for the Project, wrote the basic description for the project              |             |                      |          |
 | Student2     |                 |             |                      |          |
 | Student3     |                 |             |                      |          |
 
