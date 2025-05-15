@@ -8,7 +8,7 @@
 | Student Name | Weekly Progress | Impediments | Promises (Next Week) | Comments |
 | :----------- | :-------------- | :---------- | :------------------- | :------- |
 | Igor         | Participated in creating and choosing the idea for the Project, wrote the basic description for the project              |             |                      |          |
-| Student2     |                 |             |                      |          |
+| Mahdi Harrabi     | Brainstorming ideas and proposing the selected project idea and also wrote the project description                 |             |                      |          |
 | Student3     |                 |             |                      |          |
 
 ---
