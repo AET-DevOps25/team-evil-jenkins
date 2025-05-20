@@ -1,0 +1,8 @@
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "8080:8080" # TODO: should mapping be defined here ? 
+
+# TODO:
+# othe-service:
