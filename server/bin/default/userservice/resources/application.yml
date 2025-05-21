@@ -1,0 +1,4 @@
+server:
+  port: 8080
+
+#OTHER_SERVICE_URL:  "http://..." TODO: Set URLs to other services
