@@ -20,5 +20,5 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 application {
-    mainClass = 'userservice.src.UserServiceApplication'
+    mainClass = 'com.team.evil.jenkins.userservice.UserServiceApplication'
 }
