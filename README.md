@@ -30,3 +30,14 @@ Max is a busy professional who wants to stay active but doesn't have time to org
 * Scenario 3: Preparing for Marathon
 Ali is training for a half marathon and wants running partners for early mornings. He signs up, selects "running" as a favorite activity, and adds his availability and other preferences. By clicking "Show matches" button, the web platform lists matching users. Ali can afterwards get in touch with the recommended users.
 
+
+### Technical Description 
+
+##  Architecture Overview
+
+
+* Server (Spring Boot REST API): Manages user profiles, matching, and communication via REST endpoints. Built with Spring Boot, it handles CRUD operations, authentication, and orchestrates interactions.
+* Client (React Frontend): Provides a user-friendly interface for profile creation, match viewing, and messaging. 
+* GenAI Service (Python LangChain): Enhances matching by predicting compatibility using LangChain and processes user data with LLM embedding models.
+* Database (PostgreSQL): Stores users profiles, sports, matches, and messages.
+
