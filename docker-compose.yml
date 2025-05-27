@@ -2,13 +2,17 @@ services:
   user-service:
     build: ./server/userservice
     ports:
-      - "8080:8080" # TODO: should mapping be defined here ? 
+      - "8080:8080"
+
+  location-service:
+    build: ./server/locationservice
+    ports:
+      - "8081:8080"
 
   client:
     build: ./client
     ports:
       - "3000:80"
-    
 
 # TODO:
 # othe-service:
