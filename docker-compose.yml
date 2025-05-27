@@ -4,16 +4,6 @@ services:
     ports:
       - "8080:8080" # TODO: should mapping be defined here ? 
 
-  matching-service:
-    build: ./server/matchingservice
-    ports:
-      - "8081:8080"
-
-  messaging-service:
-    build: ./server/messagingservice
-    ports:
-      - "8082:8080"
-
   client:
     build: ./client
     ports:
