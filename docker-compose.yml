@@ -1,11 +1,15 @@
 services:
   user-service:
-    build: ./server/userservice
+    build:
+      context: ./server
+      dockerfile: userservice/Dockerfile
     ports:
       - "8080:8080"
 
   location-service:
-    build: ./server/locationservice
+    build:
+      context: ./server
+      dockerfile: locationservice/Dockerfile
     ports:
       - "8081:8080"
 
