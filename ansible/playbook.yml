@@ -1,0 +1,67 @@
+---
+- name: Deploy Microservices to EC2
+  hosts: all # This will target the host(s) defined in inventory.ini
+  become: yes # Most docker commands require sudo
+  vars:
+    # These variables will be passed from Terraform or defined in terraform.tfvars
+    # ghcr_username: "YOUR_GITHUB_USERNAME_VAR"
+    # ghcr_pat: "YOUR_GHCR_PAT_VAR"
+    client_image: "ghcr.io/AET-DevOps25/team-evil-jenkins/client:latest"
+    user_service_image: "ghcr.io/AET-DevOps25/team-evil-jenkins/user-service:latest"
+    location_service_image: "ghcr.io/AET-DevOps25/team-evil-jenkins/location-service:latest"
+
+  tasks:
+    - name: Ensure Docker is active and enabled
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Log in to GitHub Container Registry
+      community.docker.docker_login:
+        registry_url: ghcr.io
+        username: "{{ ghcr_username }}"
+        password: "{{ ghcr_pat }}"
+      when: ghcr_username is defined and ghcr_pat is defined
+
+    - name: Pull client Docker image
+      community.docker.docker_image:
+        name: "{{ client_image }}"
+        source: pull
+
+    - name: Pull user-service Docker image
+      community.docker.docker_image:
+        name: "{{ user_service_image }}"
+        source: pull
+
+    - name: Pull location-service Docker image
+      community.docker.docker_image:
+        name: "{{ location_service_image }}"
+        source: pull
+
+    - name: Run client container
+      community.docker.docker_container:
+        name: client
+        image: "{{ client_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "3000:80"
+
+    - name: Run user-service container
+      community.docker.docker_container:
+        name: user-service
+        image: "{{ user_service_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8080:8080"
+
+    - name: Run location-service container
+      community.docker.docker_container:
+        name: location-service
+        image: "{{ location_service_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8081:8080"

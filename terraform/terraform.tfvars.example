@@ -1,0 +1,17 @@
+# Example terraform.tfvars file.
+# Rename this file to terraform.tfvars and fill in your specific values.
+# Do NOT commit terraform.tfvars to version control if it contains sensitive information.
+
+# aws_region    = "us-west-2"
+# instance_type = "t2.micro"
+# project_name  = "team-evil"
+
+# Required: Specify the name of your EC2 key pair for SSH access
+# key_name      = "your-ec2-key-pair-name"
+
+# Optional: Specify a particular AMI ID. If commented out, latest Amazon Linux 2 will be used.
+# ami_id        = "ami-xxxxxxxxxxxxxxxxx"
+
+# Optional: Specify VPC and Subnet IDs if not using the default VPC.
+# vpc_id        = "vpc-xxxxxxxxxxxxxxxxx"
+# subnet_id     = "subnet-xxxxxxxxxxxxxxxxx"
