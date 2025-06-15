@@ -6,9 +6,9 @@
     # These variables will be passed from Terraform or defined in terraform.tfvars
     # ghcr_username: "YOUR_GITHUB_USERNAME_VAR"
     # ghcr_pat: "YOUR_GHCR_PAT_VAR"
-    client_image: "ghcr.io/AET-DevOps25/team-evil-jenkins/client:latest"
-    user_service_image: "ghcr.io/AET-DevOps25/team-evil-jenkins/user-service:latest"
-    location_service_image: "ghcr.io/AET-DevOps25/team-evil-jenkins/location-service:latest"
+    client_image: "ghcr.io/aet-devops25/team-evil-jenkins/client:latest"
+    user_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/user-service:latest"
+    location_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/location-service:latest"
 
   tasks:
     - name: Ensure Docker is active and enabled

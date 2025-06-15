@@ -21,8 +21,11 @@ data "aws_vpc" "default" {
   default = true
 }
 
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 }
 
 resource "aws_security_group" "web_sg" {
@@ -87,7 +90,7 @@ resource "aws_instance" "web_server" {
   instance_type = var.instance_type
   key_name      = var.key_name
 
-  subnet_id = var.subnet_id == "" ? sort(data.aws_subnet_ids.default.ids)[0] : var.subnet_id
+  subnet_id = var.subnet_id == "" ? sort(data.aws_subnets.default.ids)[0] : var.subnet_id
 
   vpc_security_group_ids      = [aws_security_group.web_sg.id]
   associate_public_ip_address = true
@@ -104,12 +107,29 @@ resource "aws_instance" "web_server" {
               sudo service docker start
               sudo usermod -a -G docker ec2-user
               sudo chkconfig docker on
+              sudo amazon-linux-extras install -y python3.8
+sudo yum install -y python3-pip
+sudo pip3.8 install "urllib3<2.0" requests docker
               # Ansible will handle the rest
               EOF
 }
 
+resource "local_file" "ansible_inventory" {
+  content = templatefile("${path.module}/inventory.ini.tpl", {
+    instance_public_ip   = aws_instance.web_server.public_ip,
+    ssh_private_key_path = var.ssh_private_key_path
+  })
+  filename = "${path.module}/../ansible/inventory.ini"
+}
+
 resource "null_resource" "ansible_provisioner" {
   depends_on = [aws_instance.web_server]
+
+  triggers = {
+    instance_id      = aws_instance.web_server.id
+    inventory_file   = local_file.ansible_inventory.id # Ensures inventory is updated before running Ansible
+    playbook_content = filemd5("${path.module}/../ansible/playbook.yml") # Rerun if playbook changes
+  }
 
   provisioner "local-exec" {
     # Wait for SSH to become available. Increase timeout if needed.
@@ -126,19 +146,17 @@ resource "null_resource" "ansible_provisioner" {
       fi
       echo "Instance ${aws_instance.web_server.public_ip} is ready. Proceeding with Ansible."
 
-      # Create Ansible inventory file dynamically
-      cat > ../ansible/inventory.ini <<EOF
-      [webservers]
-      ${aws_instance.web_server.public_ip} ansible_user=ec2-user ansible_ssh_private_key_file=${var.ssh_private_key_path}
-      EOF
+      # Wait for SSH to be available
+      until ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "${var.ssh_private_key_path}" ec2-user@${aws_instance.web_server.public_ip} exit; do
+        echo "Waiting for SSH on ${aws_instance.web_server.public_ip}..."
+        sleep 5
+      done
+      echo "SSH is available on ${aws_instance.web_server.public_ip}."
 
-      # Run Ansible playbook
-      # Ensure ANSIBLE_HOST_KEY_CHECKING is False or configure known_hosts
-      # Pass GHCR credentials as extra vars to Ansible
-      ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
-        -i ../ansible/inventory.ini \
-        --extra-vars "ghcr_username=${var.ghcr_username} ghcr_pat=${var.ghcr_pat}" \
-        ../ansible/playbook.yml
+      # Run the Ansible playbook
+      # Suppress sensitive output by default, but allow verbose output if needed for debugging
+      ansible-playbook -i ../ansible/inventory.ini ../ansible/playbook.yml --extra-vars "ghcr_username=${var.ghcr_username} ghcr_pat=${var.ghcr_pat}" || \
+      (echo 'Ansible playbook failed. Rerun with -vvv for details.' && exit 1)
     EOT
     interpreter = ["bash", "-c"]
     working_dir = path.module # Run from the terraform directory
