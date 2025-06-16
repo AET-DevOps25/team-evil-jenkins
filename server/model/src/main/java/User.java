@@ -12,6 +12,11 @@ public class User {
     public User() {
     }
 
+    public User(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     // Getters and setters
     public String getName() {
         return name;

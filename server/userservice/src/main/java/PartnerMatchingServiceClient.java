@@ -1,4 +1,4 @@
-package userservice.src;
+package userservice;
 
 public class PartnerMatchingServiceClient {
     
