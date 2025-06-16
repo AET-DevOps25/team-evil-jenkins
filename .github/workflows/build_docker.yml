@@ -22,6 +22,20 @@ jobs:
       - name: Build with Gradle
         run: cd server && ./gradlew build
 
+      - name: Upload UserService Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: userservice-jar
+          path: server/userservice/build/libs/*.jar
+
+      - name: Upload LocationService Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: locationservice-jar
+          path: server/locationservice/build/libs/*.jar
+
+      # TODO: Upload everything in a matrix   
+
   publish-docker-images:
     name: Build and publish Docker Images
     needs: java-build
