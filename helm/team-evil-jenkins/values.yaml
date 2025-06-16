@@ -1,0 +1,57 @@
+# Global values can be defined here
+
+# Namespace configuration
+namespace:
+  name: team-evil-jenkins # Your target namespace
+  create: false # Set to false if the namespace already exists or is managed externally
+
+
+imagePullPolicy: Always
+
+# Secrets for pulling images from private registries like GHCR
+imagePullSecrets:
+  - name: ghcr-creds # This should match the name of the secret you create in Kubernetes
+
+# GHCR image registry
+ghcr:
+  registry: ghcr.io
+  organization: aet-devops25 # Using lowercase as per previous findings
+
+client:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/client
+    tag: latest 
+  service:
+    type: NodePort # Or LoadBalancer/ClusterIP depending on your needs and Ingress setup
+    port: 80 # Container port
+    nodePort: 30002 # Exposed NodePort, ensure it's within allowed range
+
+userService:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/user-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8080 # Container port
+
+locationService:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/location-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8080 # Container port 
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  # If not set and create is false, the default service account in the namespace is used.
+  # name: ""
+

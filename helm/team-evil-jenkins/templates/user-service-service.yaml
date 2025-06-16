@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "team-evil-jenkins.fullname" . }}-user-service
+  labels:
+    {{- include "team-evil-jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: user-service
+spec:
+  type: {{ .Values.userService.service.type }}
+  ports:
+    - port: {{ .Values.userService.service.port }}
+      targetPort: http # Assumes the container port is named 'http' in the Deployment
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "team-evil-jenkins.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: user-service
