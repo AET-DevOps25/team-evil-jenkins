@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "team-evil-jenkins.fullname" . }}-user-service
+  labels:
+    {{- include "team-evil-jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: user-service
+spec:
+  replicas: {{ .Values.userService.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "team-evil-jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: user-service
+  template:
+    metadata:
+      labels:
+        {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: user-service
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
+      securityContext:
+        {{- .Values.userService.podSecurityContext | toYaml | nindent 8 }}
+      containers:
+        - name: user-service
+          securityContext:
+            {{- .Values.userService.securityContext | toYaml | nindent 12 }}
+          image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.userService.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Add appropriate liveness and readiness probes for user-service
+          # For example, if it has a /health endpoint:
+          # livenessProbe:
+          #   httpGet:
+          #     path: /actuator/health # Or your specific health check endpoint
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /actuator/health # Or your specific health check endpoint
+          #     port: http
+          resources:
+            {{- .Values.userService.resources | toYaml | nindent 12 }}
+      {{- with .Values.userService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.userService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.userService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
