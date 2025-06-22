@@ -18,7 +18,11 @@ services:
     build: ./client
     ports:
       - "3000:80"
-    
+
+  genai-service:
+    build: ./genai
+    ports:
+      - "8000:8000"
 
 # TODO:
 # othe-service:
