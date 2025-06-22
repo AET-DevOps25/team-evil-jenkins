@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.team.evil.jenkins'
-version = '1.0.0'
+version = serviceVersion
 
 repositories {
     mavenCentral()
@@ -20,4 +20,11 @@ dependencies {
 
 application {
     mainClass = 'locationservice.LocationServiceApplication'
+}
+
+task printVersion {
+    doLast {
+        // This will print the final, resolved version of the project
+        println project.version
+    }
 }

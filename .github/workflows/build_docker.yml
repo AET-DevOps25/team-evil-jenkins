@@ -22,6 +22,21 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Get project version
+        id: get_version
+        run: |
+          # Run the printVersion task and capture its output.
+          # The "tail -n 1" ensures we only get the last line of output.
+          VERSION=$(./gradlew printVersion -q | tail -n 1)
+          # Set the version as a step output
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Use the version
+        run: |
+          echo "The extracted version is: ${{ steps.get_version.outputs.version }}"
+          echo "We can now build a Docker image with this version."
+          # Example: docker build . -t my-repo/service-a:${{ steps.get_version.outputs.version }}
+
       - name: Build with Gradle
         run: cd server && ./gradlew build
 
@@ -48,10 +63,8 @@ jobs:
         service_config:
           - name: client          
             path: ./client
-            context: ./client
           - name: location-service    
             path: ./server/locationservice
-            context: ./server
             jar_artifact_name: locationservice-jar
             jar_download_target_dir: server/locationservice/build/libs
 
