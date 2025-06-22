@@ -104,7 +104,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
-          context: ./${{ matrix.service_config.context }}
+          context: ./${{ matrix.service_config.path }}
           file: ./${{ matrix.service_config.path }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
