@@ -1,19 +1,23 @@
-FROM gradle:8.14-jdk21 AS build
+FROM eclipse-temurin:17
+COPY build/libs/*.jar userservice.jar
+ENTRYPOINT ["java", "-jar", "/userservice.jar"]
 
-WORKDIR /app
+# FROM gradle:8.14-jdk21 AS build
 
-COPY gradle ./gradle
-COPY gradlew ./gradlew
-COPY gradlew.bat ./gradlew.bat
-COPY settings.gradle ./settings.gradle
-COPY model ./model
-COPY userservice/ ./userservice
+# WORKDIR /app
 
-WORKDIR /app/userservice
-RUN gradle bootJar --no-daemon
+# COPY gradle ./gradle
+# COPY gradlew ./gradlew
+# COPY gradlew.bat ./gradlew.bat
+# COPY settings.gradle ./settings.gradle
+# COPY model ./model
+# COPY userservice/ ./userservice
 
-FROM gcr.io/distroless/java21-debian12
+# WORKDIR /app/userservice
+# RUN gradle bootJar --no-daemon
 
-COPY --from=build /app/userservice/build/libs/*.jar userservice.jar
-EXPOSE 8080
-CMD ["userservice.jar"]
+# FROM gcr.io/distroless/java21-debian12
+
+# COPY --from=build /app/userservice/build/libs/*.jar userservice.jar
+# EXPOSE 8080
+# CMD ["userservice.jar"]

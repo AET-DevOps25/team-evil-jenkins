@@ -2,6 +2,9 @@ name: Build Docker Images
 
 on:
   push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   java-build:
@@ -45,19 +48,31 @@ jobs:
         service_config:
           - name: client          
             path: ./client
-            context: ./client        
+            context: ./client
           - name: location-service    
             path: ./server/locationservice
             context: ./server
+            jar_artifact_name: locationservice-jar
+            jar_download_target_dir: server/locationservice/build/libs
+
           - name: user-service   
             path: ./server/userservice
             context: ./server
+            jar_artifact_name: userservice-jar
+            jar_download_target_dir: server/userservice/build/libs
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Download JAR artifact
+        if: matrix.service_config.jar_artifact_name
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.service_config.jar_artifact_name }}
+          path: ${{ matrix.service_config.jar_download_target_dir }}
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
