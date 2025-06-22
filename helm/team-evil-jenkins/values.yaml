@@ -1,0 +1,52 @@
+# Global values can be defined here
+
+# Namespace configuration
+namespace:
+  name: team-evil-jenkins 
+  create: false 
+
+
+imagePullPolicy: Always
+
+# Secrets for pulling images from private registries like GHCR
+imagePullSecrets:
+  - name: ghcr-creds # This should match the name of the secret you create in Kubernetes
+
+# GHCR image registry
+ghcr:
+  registry: ghcr.io
+  organization: aet-devops25 
+
+client:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/client
+    tag: latest 
+  service:
+    type: NodePort 
+    port: 80 
+    nodePort: 30002 
+
+userService:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/user-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8080 # Container port
+
+locationService:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/location-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8080 # Container port 
+
+serviceAccount:
+  create: false
+  annotations: {}
+ 
+

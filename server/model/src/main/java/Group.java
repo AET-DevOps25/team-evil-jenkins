@@ -4,6 +4,7 @@ import java.util.List;
 import java.time.LocalDateTime;
 
 public class Group {
+<<<<<<< HEAD
     private String id;
     private String name;
     private User admin;
@@ -101,3 +102,7 @@ public class Group {
         setEventDate(date);
     }
 }
+=======
+    
+}
+>>>>>>> origin/main

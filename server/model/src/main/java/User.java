@@ -52,6 +52,7 @@ public class User {
     public void setSportInterests(List<Sport> sportInterests) {
         this.sportInterests = sportInterests;
     }
+<<<<<<< HEAD
      public User findPartner(IPartnerMatcher partnerMatcher) {
         return partnerMatcher.findPartner(this, null);
     }
@@ -61,4 +62,6 @@ public class User {
     public void registerUser() {
         //TODO: Implement user registration logic
     }
+=======
+>>>>>>> origin/main
 }
