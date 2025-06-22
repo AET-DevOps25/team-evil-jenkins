@@ -1,3 +1,5 @@
+package messagingservice;
+
 import org.springframework.stereotype.Service;
 
 @Service

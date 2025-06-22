@@ -7,13 +7,12 @@ COPY gradlew ./gradlew
 COPY gradlew.bat ./gradlew.bat
 COPY settings.gradle ./settings.gradle
 COPY model ./model
-COPY messagingservice/ ./messagingservice
+COPY matchingservice/ ./matchingservice
 
-WORKDIR /app/messagingservice
+WORKDIR /app/matchingservice
 RUN gradle bootJar --no-daemon
 
 FROM gcr.io/distroless/java21-debian12
-
-COPY --from=build /app/messagingservice/build/libs/*.jar messagingservice.jar
+COPY --from=build /app/matchingservice/build/libs/*.jar matchingservice.jar
 EXPOSE 8080
-CMD ["messagingservice.jar"]
+CMD ["matchingservice.jar"]

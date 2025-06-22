@@ -52,16 +52,16 @@ public class User {
     public void setSportInterests(List<Sport> sportInterests) {
         this.sportInterests = sportInterests;
     }
-<<<<<<< HEAD
-     public User findPartner(IPartnerMatcher partnerMatcher) {
+
+    public User findPartner(IPartnerMatcher partnerMatcher) {
         return partnerMatcher.findPartner(this, null);
     }
+
     public void sendMessage(Group group, String message) {
-        //TODO: Implement message sending logic
+        // TODO: Implement message sending logic
     }
+
     public void registerUser() {
-        //TODO: Implement user registration logic
+        // TODO: Implement user registration logic
     }
-=======
->>>>>>> origin/main
 }
