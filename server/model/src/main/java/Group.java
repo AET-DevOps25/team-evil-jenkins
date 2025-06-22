@@ -1,5 +1,8 @@
 package model;
 
+import java.util.List;
+import java.time.LocalDateTime;
+
 public class Group {
     private String id;
     private String name;
@@ -9,9 +12,11 @@ public class Group {
     private LocalDateTime eventDate;
     private Sport sport;
 
-    public Group() {}
+    public Group() {
+    }
 
-    public Group(String id, String name, User admin, List<User> participants, List<Message> messages, LocalDateTime eventDate, Sport sport) {
+    public Group(String id, String name, User admin, List<User> participants, List<Message> messages,
+            LocalDateTime eventDate, Sport sport) {
         this.id = id;
         this.name = name;
         this.admin = admin;
@@ -44,7 +49,7 @@ public class Group {
 
     public void setAdmin(User admin) {
         this.admin = admin;
-    }   
+    }
 
     public List<User> getParticipants() {
         return participants;
@@ -77,18 +82,22 @@ public class Group {
     public void setSport(Sport sport) {
         this.sport = sport;
     }
+
     public void addParticipant(User participant) {
         participants.add(participant);
     }
+
     public void removeParticipant(User participant) {
         participants.remove(participant);
     }
+
     public void sendMessage(String message) {
-        //TODO: Implement message sending logic
+        // TODO: Implement message sending logic
         messages.add(newMessage);
     }
+
     public void createMeetingSuggestion(LocalDateTime date) {
-        //TODO: Implement meeting suggestion creation logic
+        // TODO: Implement meeting suggestion creation logic
         setEventDate(date);
     }
 }
