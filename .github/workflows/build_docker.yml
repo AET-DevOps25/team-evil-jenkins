@@ -2,7 +2,6 @@ name: Build Docker Images
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -37,6 +36,10 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew :${{ matrix.service }}:build
+        working-directory: ./server
+
+      - name: Run Tests with Gradle
+        run: ./gradlew :${{ matrix.service }}:test
         working-directory: ./server
 
       - name: Upload ${{ matrix.service }} Version

@@ -179,6 +179,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+*/bin/*
 .Python
 build/
 develop-eggs/
