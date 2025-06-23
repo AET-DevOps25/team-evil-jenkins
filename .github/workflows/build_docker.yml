@@ -51,16 +51,53 @@ jobs:
           name: ${{ matrix.service }}-${{ steps.get_version.outputs.version }}-jar
           path: server/${{ matrix.service }}/build/libs/*.jar
 
+  build-react-frontend:
+    name: Build React Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' 
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./client
+
+      - name: Build React app
+        run: npm run build
+        working-directory: ./client
+
+      - name: Cache React build output
+        id: cache-react-build
+        uses: actions/cache@v4
+        with:
+          path: ./client/build
+          key: ${{ runner.os }}-react-build-${{ hashFiles('client/src/**', 'client/public/**', 'client/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-react-build-
+
+      - name: Upload React Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-client-build-artifact
+          path: ./client/build
+          retention-days: 1
 
   publish-docker-images:
     name: Build and publish Docker Images
-    needs: java-build
+    needs: [java-build, build-react-frontend]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service_config:
           - name: client          
             path: ./client
+            is_client: true
 
           - name: location-service    
             path: ./server/locationservice
@@ -109,6 +146,13 @@ jobs:
         with:
           name: ${{ matrix.service_config.gradle_project_name }}-${{ steps.get_version.outputs.version }}-jar
           path: ${{ matrix.service_config.jar_download_target_dir }}
+
+      - name: Download React Build Artifact
+        if: matrix.service_config.is_client
+        uses: actions/download-artifact@v4
+        with:
+          name: react-client-build-artifact
+          path: ./client 
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
