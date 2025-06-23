@@ -3,5 +3,5 @@ plugins {
 }
 
 rootProject.name = 'SportMatcher'
-include 'model', 'userservice', 'locationservice'
+include 'model', 'userservice', 'locationservice', 'messagingservice', 'matchingservice'
 

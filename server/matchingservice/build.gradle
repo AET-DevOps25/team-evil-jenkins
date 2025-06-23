@@ -3,5 +3,5 @@ dependencies {
 }
 
 application {
-    mainClass = 'locationservice.LocationServiceApplication'
+    mainClass = 'matchingservice.MatchingServiceApplication'
 }
