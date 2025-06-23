@@ -2,11 +2,17 @@ name: Build Docker Images
 
 on:
   push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   java-build:
-    name: Build Java Application
+    name: Build ${{ matrix.service }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [userservice, locationservice, matchingservice, messagingservice]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,8 +25,32 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Get Service Version
+        id: get_version
+        run: |
+          SERVICE_VERSION=$(./gradlew :${{ matrix.service }}:printVersion -q)
+          echo "Discovered version: $SERVICE_VERSION"
+          echo "version=${SERVICE_VERSION}" >> $GITHUB_OUTPUT
+          echo "${SERVICE_VERSION}" > version.txt
+
+        working-directory: ./server
+
       - name: Build with Gradle
-        run: cd server && ./gradlew build
+        run: ./gradlew :${{ matrix.service }}:build
+        working-directory: ./server
+
+      - name: Upload ${{ matrix.service }} Version
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}-version
+          path: server/version.txt
+
+      - name: Upload ${{ matrix.service }} Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}-${{ steps.get_version.outputs.version }}-jar
+          path: server/${{ matrix.service }}/build/libs/*.jar
+
 
   publish-docker-images:
     name: Build and publish Docker Images
@@ -31,19 +61,54 @@ jobs:
         service_config:
           - name: client          
             path: ./client
-            context: ./client        
+
           - name: location-service    
             path: ./server/locationservice
-            context: ./server
+            jar_download_target_dir: server/locationservice/build/libs
+            gradle_project_name: locationservice
+
           - name: user-service   
             path: ./server/userservice
-            context: ./server
+            jar_download_target_dir: server/userservice/build/libs
+            gradle_project_name: userservice
+          
+          - name: matching-service
+            path: ./server/matchingservice
+            jar_download_target_dir: server/matchingservice/build/libs
+            gradle_project_name: matchingservice
+
+          - name: messaging-service
+            path: ./server/messagingservice
+            jar_download_target_dir: server/messagingservice/build/libs
+            gradle_project_name: messagingservice
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Download Version artifact
+        if: matrix.service_config.gradle_project_name
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.service_config.gradle_project_name }}-version
+          path: /tmp/version-info
+
+      - name: Read Version from file
+        if: matrix.service_config.gradle_project_name
+        id: get_version
+        run: |
+          SERVICE_VERSION=$(cat /tmp/version-info/version.txt)
+          echo "Using version from build job: $SERVICE_VERSION"
+          echo "version=${SERVICE_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Download JAR artifact
+        if: matrix.service_config.gradle_project_name
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.service_config.gradle_project_name }}-${{ steps.get_version.outputs.version }}-jar
+          path: ${{ matrix.service_config.jar_download_target_dir }}
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -67,15 +132,22 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.service_config.name }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            # Use Gradle version for Java services, e.g., 0.0.1-SNAPSHOT
+            type=raw,value=${{ steps.get_version.outputs.version }},enable=${{ matrix.service_config.gradle_project_name != '' }}
+            # Git short commit hash (e.g., a1b2c3d)
+            type=sha,format=short
+            # Git branch name
             type=ref,event=branch
+            # Pull Request number
             type=ref,event=pr
+            # latest tag on default branch
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker Image
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
-          context: ./${{ matrix.service_config.context }}
+          context: ./${{ matrix.service_config.path }}
           file: ./${{ matrix.service_config.path }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
