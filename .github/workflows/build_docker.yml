@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [userservice, locationservice]
+        service: [userservice, locationservice, matchingservice, messagingservice]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,6 +71,16 @@ jobs:
             path: ./server/userservice
             jar_download_target_dir: server/userservice/build/libs
             gradle_project_name: userservice
+          
+          - name: matching-service
+            path: ./server/matchingservice
+            jar_download_target_dir: server/matchingservice/build/libs
+            gradle_project_name: matchingservice
+
+          - name: messaging-service
+            path: ./server/messagingservice
+            jar_download_target_dir: server/messagingservice/build/libs
+            gradle_project_name: messagingservice
 
     steps:
       - name: Checkout
