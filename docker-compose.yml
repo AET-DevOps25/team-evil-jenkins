@@ -13,10 +13,29 @@ services:
     ports:
       - "8081:8080"
 
+  messaging-service:
+    build:
+      context: ./server
+      dockerfile: messagingservice/Dockerfile
+    ports:
+      - "8082:8080"
+
   client:
     build: ./client
     ports:
       - "3000:80"
 
+  genai-service:
+    build: ./genai
+    ports:
+      - "8000:8000"
+
 # TODO:
+  matching-service:
+    build:
+      context: ./server
+      dockerfile: matchingservice/Dockerfile
+    ports:
+      - "8083:8080"
+
 # othe-service:
