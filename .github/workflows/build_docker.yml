@@ -206,7 +206,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-e2e-test:
+  e2e-test:
     name: Run End-to-End Tests
     needs: [publish-docker-images]
     runs-on: ubuntu-latest
