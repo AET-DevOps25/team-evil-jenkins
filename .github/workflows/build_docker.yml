@@ -239,19 +239,6 @@ jobs:
           done
           echo "::set-output name=client_version::${{ github.sha }}" # Or 'latest' if you always tag client as latest
 
-
-      - name: Prepare Docker Compose file
-        run: |
-          cp docker-compose.e2e.template.yml docker-compose.yml
-          sed -i "s|{USER_SERVICE_VERSION}|${{ steps.get_versions_for_compose.outputs.userservice_version }}|g" docker-compose.yml
-          sed -i "s|{LOCATION_SERVICE_VERSION}|${{ steps.get_versions_for_compose.outputs.locationservice_version }}|g" docker-compose.yml
-          sed -i "s|{MATCHING_SERVICE_VERSION}|${{ steps.get_versions_for_compose.outputs.matchingservice_version }}|g" docker-compose.yml
-          sed -i "s|{MESSAGING_SERVICE_VERSION}|${{ steps.get_versions_for_compose.outputs.messagingservice_version }}|g" docker-compose.yml
-          sed -i "s|{CLIENT_VERSION}|${{ steps.get_versions_for_compose.outputs.client_version }}|g" docker-compose.yml
-          
-          echo "Generated docker-compose.yml:"
-          cat docker-compose.yml
-
       - name: Pull Docker images
         run: docker compose pull
 
