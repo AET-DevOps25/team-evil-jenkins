@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      base-path: /api/actuator
+      exposure:
+        include: health,info,prometheus
+  prometheus:
+    enabled: true
+
+my-service:
+  message: Hello from Default Profile!
+
+spring:
+  profiles:
+    active: development
+---
+
+spring:
+  config:
+    activate:
+      on-profile: development
+
+my-service:
+  message: Hello from Development!
+
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+
+my-service:
+  message: Hello from Production!

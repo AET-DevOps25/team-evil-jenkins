@@ -1,3 +1,0 @@
-# Configuration for messaging-service
-server:
-  port: 8082
