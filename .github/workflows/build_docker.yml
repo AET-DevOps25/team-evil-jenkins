@@ -5,11 +5,13 @@ on:
     paths:
       - 'client/**'
       - 'server/**'
+      - '.github/workflows/build_docker.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'client/**'
       - 'server/**'
+      - '.github/workflows/build_docker.yml'
 
 jobs:
   java-build:
