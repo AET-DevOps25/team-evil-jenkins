@@ -1,2 +1,0 @@
-rootProject.name = 'SportMatcher' //TODO: Think of a name :)
-include 'model', 'userservice', 'locationservice'
