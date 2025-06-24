@@ -12,3 +12,53 @@ scrape_configs:
     static_configs:
       - targets: ['user-service:8080'] 
 
+  - job_name: 'location-service'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets: ['location-service:8080'] 
+
+  - job_name: 'matching-service'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets: ['matching-service:8080'] 
+
+  - job_name: 'messaging-service'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets: ['messaging-service:8080'] 
+
+  - job_name: 'client'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets: ['client:8080'] 
+
+# Usefull prometheus metrics:
+
+# * **To see all metrics from your `user-service`:**
+#     Type `http_server_requests_seconds_count` (this is a common metric that tracks HTTP request counts).
+#     Then click **"Execute"**. You'll see a list of time series for this metric, often broken down by labels like `method`, `status`, `uri`, `job`, and `instance`.
+
+# * **Generic Metrics (JVM, System):**
+#     * `jvm_memory_used_bytes`: Shows the current memory usage of your JVM. You might want to add labels to filter it, e.g., `jvm_memory_used_bytes{area="heap"}` for heap memory.
+#     * `process_cpu_usage`: CPU usage of the process.
+#     * `jvm_threads_live_threads`: Number of live threads in the JVM.
+#     * `system_cpu_usage`: System-wide CPU usage.
+
+# * **HTTP Request Metrics (very useful):**
+#     * `http_server_requests_seconds_count`: The total count of HTTP requests handled by your service.
+#     * `http_server_requests_seconds_sum`: The total time spent handling HTTP requests.
+#     * `http_server_requests_seconds_max`: The maximum time taken for an HTTP request within the scrape interval.
+
+#     **Example: Calculating Request Rate (Throughput):**
+#     To see the requests per second for your `user-service`, you can use the `rate()` function in PromQL:
+#     `rate(http_server_requests_seconds_count{job="user-service"}[1m])`
+#     This calculates the per-second average rate over the last 1 minute.
+
+#     **Example: Average Request Latency:**
+#     `http_server_requests_seconds_sum{job="user-service"} / http_server_requests_seconds_count{job="user-service"}`
+#     This simple division gives you the average latency. For a more robust average over time, combine with `rate()`:
+#     `rate(http_server_requests_seconds_sum{job="user-service"}[1m]) / rate(http_server_requests_seconds_count{job="user-service"}[1m])`
+
+# * **Specific Endpoint Metrics:**
+#     If you have specific REST endpoints, Spring Boot often includes the `uri` label. For example, if you had an endpoint `/users`, you might query:
+#     `http_server_requests_seconds_count{uri="/api/users"}` (assuming `/api` is your context path for controllers).

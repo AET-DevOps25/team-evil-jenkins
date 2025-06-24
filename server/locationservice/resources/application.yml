@@ -1,3 +1,0 @@
-# Configuration for location-service
-server:
-  port: 8081
