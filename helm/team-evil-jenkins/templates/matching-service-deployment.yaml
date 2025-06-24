@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "team-evil-jenkins.fullname" . }}-matching-service
+  labels:
+    {{- include "team-evil-jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: matching-service
+spec:
+  replicas: {{ .Values.matchingService.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "team-evil-jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: matching-service
+  template:
+    metadata:
+      labels:
+        {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: matching-service
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
+      securityContext:
+        {{- .Values.matchingService.podSecurityContext | toYaml | nindent 8 }}
+      containers:
+        - name: matching-service
+          securityContext:
+            {{- .Values.matchingService.securityContext | toYaml | nindent 12 }}
+          image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.matchingService.image.repository }}:{{ .Values.matchingService.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.matchingService.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- .Values.matchingService.resources | toYaml | nindent 12 }}
+      {{- with .Values.matchingService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.matchingService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.matchingService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -45,6 +45,24 @@ locationService:
     type: ClusterIP
     port: 8080 # Container port 
 
+messagingService:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/messaging-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8080 # Container port
+
+matchingService:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/matching-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8080 # Container port
+
 serviceAccount:
   create: false
   annotations: {}
