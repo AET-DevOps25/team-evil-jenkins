@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=development
+
 
   location-service:
     build:
@@ -15,27 +18,47 @@ services:
 
   messaging-service:
     build:
-      context: ./server
-      dockerfile: messagingservice/Dockerfile
+      context: ./server/messagingservice
+      dockerfile: Dockerfile
     ports:
       - "8082:8080"
+
+  matching-service:
+    build:
+      context: ./server/matchingservice
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8080"
 
   client:
     build: ./client
     ports:
       - "3000:80"
 
-  genai-service:
-    build: ./genai
-    ports:
-      - "8000:8000"
+  # genai-c:
+  #   build: ./genai
+  #   ports:
+  #     - "8000:8000"
 
-# TODO:
-  matching-service:
-    build:
-      context: ./server
-      dockerfile: matchingservice/Dockerfile
-    ports:
-      - "8083:8080"
+  prometheus: 
+    image: prom/prometheus:v2.52.0
+    container_name: prometheus
+    ports: 
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    depends_on:
+      - user-service
 
-# othe-service:
+
+
+volumes: # TODO: add volumes for database and maybe other services
+  prometheus_data:
