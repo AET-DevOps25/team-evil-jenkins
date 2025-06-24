@@ -18,6 +18,6 @@
 # EXPOSE 8080
 # CMD ["messagingservice.jar"]
 
-FROM eclipse-temurin:17
+FROM openjdk:21-jdk-slim
 COPY build/libs/*.jar messagingservice.jar
 ENTRYPOINT ["java", "-jar", "/messagingservice.jar"]

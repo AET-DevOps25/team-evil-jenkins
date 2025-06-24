@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17
+FROM openjdk:21-jdk-slim
 COPY build/libs/*.jar locationservice.jar
 
 EXPOSE 8080

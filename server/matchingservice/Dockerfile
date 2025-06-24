@@ -17,6 +17,6 @@
 # EXPOSE 8080
 # CMD ["matchingservice.jar"]
 
-FROM eclipse-temurin:17
+FROM openjdk:21-jdk-slim
 COPY build/libs/*.jar matchingservice.jar
 ENTRYPOINT ["java", "-jar", "/matchingservice.jar"]
