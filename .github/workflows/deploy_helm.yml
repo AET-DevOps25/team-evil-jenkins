@@ -34,4 +34,4 @@ jobs:
 
       - name: Helm upgrade/install
         run: |
-          helm upgrade --install team-evil-jenkins ./helm/team-evil-jenkins -n team-evil-jenkins --set redeploy=$(date +%s) --wait --debug
+          helm upgrade --install team-evil-jenkins ./helm/team-evil-jenkins -n team-evil-jenkins --set redeploy=$(date +%s) --debug
