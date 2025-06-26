@@ -16,6 +16,8 @@ spec:
       labels:
         {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: client
+      annotations:
+        redeploy-timestamp: "{{ .Values.redeploy | default "" }}"
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
