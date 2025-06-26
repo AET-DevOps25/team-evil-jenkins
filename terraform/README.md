@@ -71,5 +71,7 @@ Once `terraform apply` completes successfully:
 *   **Client (Frontend)**: `http://<EC2_PUBLIC_IP>:3000`
 *   **User Service**: `http://<EC2_PUBLIC_IP>:8080`
 *   **Location Service**: `http://<EC2_PUBLIC_IP>:8081`
+*   **Messaging Service**: `http://<EC2_PUBLIC_IP>:8082`
+*   **Matching Service**: `http://<EC2_PUBLIC_IP>:8083`
 
 Replace `<EC2_PUBLIC_IP>` with the actual public IP address output by Terraform (it's also in `../ansible/inventory.ini`).
