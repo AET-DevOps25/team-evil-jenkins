@@ -35,10 +35,15 @@ services:
     ports:
       - "3000:80"
 
-  # genai-c:
-  #   build: ./genai
-  #   ports:
-  #     - "8000:8000"
+  genai:
+    build: ./genai
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENWEBUI_URL=${OPENWEBUI_URL}
+      - OPENWEBUI_API_KEY=${OPENWEBUI_API_KEY}
+    depends_on:
+      - matching-service
 
   prometheus: 
     image: prom/prometheus:v2.52.0
