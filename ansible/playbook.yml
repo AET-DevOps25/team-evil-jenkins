@@ -9,6 +9,8 @@
     client_image: "ghcr.io/aet-devops25/team-evil-jenkins/client:latest"
     user_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/user-service:latest"
     location_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/location-service:latest"
+    messaging_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/messaging-service:latest"
+    matching_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/matching-service:latest"
 
   tasks:
     - name: Ensure Docker is active and enabled
@@ -39,6 +41,16 @@
         name: "{{ location_service_image }}"
         source: pull
 
+    - name: Pull messaging-service Docker image
+      community.docker.docker_image:
+        name: "{{ messaging_service_image }}"
+        source: pull
+
+    - name: Pull matching-service Docker image
+      community.docker.docker_image:
+        name: "{{ matching_service_image }}"
+        source: pull
+
     - name: Run client container
       community.docker.docker_container:
         name: client
@@ -65,3 +77,21 @@
         restart_policy: always
         ports:
           - "8081:8080"
+
+    - name: Run messaging-service container
+      community.docker.docker_container:
+        name: messaging-service
+        image: "{{ messaging_service_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8082:8080"
+
+    - name: Run matching-service container
+      community.docker.docker_container:
+        name: matching-service
+        image: "{{ matching_service_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8083:8080"
