@@ -37,7 +37,7 @@
     ]
   },
   "overrides": {
-    "nth-check": "^2.0.1",
+    "nth-check": ">=2.0.1",
     "postcss": "^8.4.35",
     "resolve-url-loader": "^5.0.0",
     "webpack-dev-server": "^4.15.1"
