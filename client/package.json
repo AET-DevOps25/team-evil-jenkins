@@ -6,11 +6,11 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.6.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^6.23.0",
-    "web-vitals": "^2.1.4"
+    "react-router-dom": "^7.6.2",
+    "web-vitals": "^5.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -35,6 +35,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "nth-check": "^2.0.1",
+    "postcss": "^8.4.35",
+    "resolve-url-loader": "^5.0.0",
+    "webpack-dev-server": "^4.15.1"
   },
   "devDependencies": {
     "react-scripts": "^5.0.1"
