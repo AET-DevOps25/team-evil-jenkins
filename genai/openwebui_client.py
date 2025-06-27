@@ -17,7 +17,7 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-ENDPOINT = config.OPENWEBUI_URL.rstrip("/") + "/v1/chat/completions"
+ENDPOINT = config.OPENWEBUI_URL.rstrip("/") + "/api/chat/completions"
 
 
 def rank_candidates(user_profile: str, candidates: List[dict], top_k: int | None = None) -> List[str]:
