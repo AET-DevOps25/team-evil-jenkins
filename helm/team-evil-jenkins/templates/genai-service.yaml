@@ -1,17 +1,19 @@
+{{- if .Values.genai.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: messaging-service
+  name: genai
   labels:
     {{- include "team-evil-jenkins.labels" . | nindent 4 }}
-    app.kubernetes.io/component: messaging-service
+    app.kubernetes.io/component: genai
 spec:
-  type: {{ .Values.messagingService.service.type }}
+  type: {{ .Values.genai.service.type }}
   ports:
-    - port: {{ .Values.messagingService.service.port }}
+    - port: {{ .Values.genai.service.port }}
       targetPort: http
       protocol: TCP
       name: http
   selector:
     {{- include "team-evil-jenkins.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: messaging-service
+    app.kubernetes.io/component: genai
+{{- end }}

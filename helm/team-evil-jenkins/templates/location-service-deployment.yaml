@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "team-evil-jenkins.fullname" . }}-location-service
+  name: location-service-deployment
   labels:
     {{- include "team-evil-jenkins.labels" . | nindent 4 }}
     app.kubernetes.io/component: location-service

@@ -23,9 +23,8 @@ client:
     repository: team-evil-jenkins/client
     tag: latest 
   service:
-    type: NodePort 
+    type: ClusterIP 
     port: 80 
-    nodePort: 30002 
 
 userService:
   replicaCount: 1
@@ -66,5 +65,31 @@ matchingService:
 serviceAccount:
   create: false
   annotations: {}
+
+# Configuration for the GenAI service
+genai:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/genai
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 80 # Service port
+  resources: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  annotations:
+    # Add any necessary annotations here, e.g., for cert-manager or nginx
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  client:
+    host: team-evil-jenkins.student.k8s.aet.cit.tum.de
+    path: /
+    pathType: Prefix
+  api:
+    host: api.team-evil-jenkins.student.k8s.aet.cit.tum.de
  
 
