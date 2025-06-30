@@ -1,18 +1,19 @@
+"""FastAPI application entry point for the GenAI service."""
+from __future__ import annotations
+
 import os
 from dotenv import load_dotenv
-from waitress import serve
-from flask import Flask
-from controller.matching_controller import matching_bp
+from fastapi import FastAPI
 
-app = Flask(__name__)
-app.register_blueprint(matching_bp)
+from routes.matching import router as matching_router
 
 load_dotenv()
 
-if __name__ == '__main__':
-    use_waitress = os.getenv("USE_WAITRESS", "false").lower() == "true"
-    port = int(os.getenv("PORT", 8000))
-    if use_waitress:
-        serve(app, host='0.0.0.0', port=port)
-    else:
-        app.run(host='0.0.0.0', port=port, debug=True)
+app = FastAPI(title="GenAI Service")
+app.include_router(matching_router)
+
+# Local dev convenience
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
