@@ -2,8 +2,17 @@ name: Build Docker Images
 
 on:
   push:
+    branches: [ "main" ] 
+    paths:
+      # - 'client/**'
+      # - 'server/**'
+      # - '.github/workflows/build_docker.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      # - 'client/**'
+      # - 'server/**'
+      # - '.github/workflows/build_docker.yml'
 
 jobs:
   java-build:
@@ -204,3 +213,70 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  e2e-test:
+    name: Run End-to-End Tests
+    needs: [publish-docker-images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Service Versions for Compose
+        id: get_versions_for_compose
+        run: |
+          for service in userservice locationservice matchingservice messagingservice; do
+            ARTIFACT_PATH="/tmp/${service}-version"
+            mkdir -p "$ARTIFACT_PATH"
+            gh run download -n "${service}-version" -D "$ARTIFACT_PATH" || echo "Warning: Artifact ${service}-version not found, skipping."
+            SERVICE_VERSION=$(cat "$ARTIFACT_PATH/version.txt" 2>/dev/null || echo "latest") # Default to latest if not found
+            echo "::set-output name=${service}_version::${SERVICE_VERSION}"
+            echo "Discovered ${service} version: ${SERVICE_VERSION}"
+          done
+          echo "::set-output name=client_version::${{ github.sha }}" # Or 'latest' if you always tag client as latest
+
+      - name: Pull Docker images
+        run: docker compose pull
+
+      - name: Bring up Docker Compose stack
+        run: docker compose up -d
+
+      - name: Wait for services to be healthy (optional but recommended)
+        run: |
+          SERVICES=(client locationservice userservice matchingservice messagingservice) # Add all your service names
+          ALL_RUNNING=true
+          for service in "${SERVICES[@]}"; do
+            if ! docker ps --format "{{.Names}}" | grep -q "${service}"; then
+              echo "Service '${service}' is not running!"
+              ALL_RUNNING=false
+            else
+              echo "Service '${service}' is running."
+            fi
+          done
+
+          if [ "$ALL_RUNNING" = false ]; then
+            echo "Not all expected services are running. Exiting."
+            docker ps -a # Show all containers (running and exited) for debugging
+            exit 1
+          fi
+
+      - name: Run E2E Tests #TODO: add end to end tests
+        run: |
+          
+          echo "Running actual E2E tests..."
+        env:
+          API_BASE_URL: http://localhost:8080 # Or the internal docker compose service name if running tests in a container
+          FRONTEND_BASE_URL: http://localhost:3000 # Or the internal docker compose service name if running tests in a container
+
+      - name: Tear down Docker Compose stack
+        if: always()
+        run: docker compose down -v
