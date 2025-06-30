@@ -9,15 +9,29 @@ import org.springframework.web.bind.annotation.RestController;
 
 import model.User;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/matching")
+@Tag(name = "Matching API", description = "Endpoints for matchmaking operations")
 public class MatchingController {
 
     @Autowired
     private MatchingService matchingService;
 
+    @Operation(summary = "Find best partner for given user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully found partner",
+                    content = @Content(schema = @Schema(implementation = User.class)))
+    })
     @GetMapping("/partner/{userId}")
-    public ResponseEntity<User> findPartner(@PathVariable String userId) {
+    public ResponseEntity<User> findPartner(@Parameter(description = "ID of user requesting partner") @PathVariable String userId) {
         return ResponseEntity.ok(matchingService.findPartner(userId));
     }
 }
