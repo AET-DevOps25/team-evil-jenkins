@@ -12,6 +12,6 @@ public class SimplePartnerMatcher implements IPartnerMatcher {
     @Override
     public User findPartner(User user, Sport sport) {
         // Dummy partner matching implementation
-        return new User();
+        return null;//new User();
     }
 }

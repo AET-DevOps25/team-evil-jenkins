@@ -16,6 +16,6 @@ public class MatchingService {
 
     public User findPartner(String userId) {
         // TODO: fetch user from repository/service, currently dummy implementation
-        return partnerMatcher.findPartner(new User(), null);
+        return null;//partnerMatcher.findPartner(new User(), null);
     }
 }
