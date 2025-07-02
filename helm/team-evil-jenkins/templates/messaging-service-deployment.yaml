@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: location-service-deployment
+  name: messaging-service-deployment
   labels:
     {{- include "team-evil-jenkins.labels" . | nindent 4 }}
-    app.kubernetes.io/component: location-service
+    app.kubernetes.io/component: messaging-service
 spec:
-  replicas: {{ .Values.locationService.replicaCount }}
+  replicas: {{ .Values.messagingService.replicaCount }}
   selector:
     matchLabels:
       {{- include "team-evil-jenkins.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: location-service
+      app.kubernetes.io/component: messaging-service
   template:
     metadata:
       labels:
         {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: location-service
+        app.kubernetes.io/component: messaging-service
       annotations:
         redeploy-timestamp: "{{ .Values.redeploy | default "" }}"
     spec:
@@ -25,16 +25,16 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
       securityContext:
-        {{- .Values.locationService.podSecurityContext | toYaml | nindent 8 }}
+        {{- .Values.messagingService.podSecurityContext | toYaml | nindent 8 }}
       containers:
-        - name: location-service
+        - name: messaging-service
           securityContext:
-            {{- .Values.locationService.securityContext | toYaml | nindent 12 }}
-          image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.locationService.image.repository }}:{{ .Values.locationService.image.tag | default .Chart.AppVersion }}"
+            {{- .Values.messagingService.securityContext | toYaml | nindent 12 }}
+          image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.messagingService.image.repository }}:{{ .Values.messagingService.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.locationService.service.port }}
+              containerPort: {{ .Values.messagingService.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -52,27 +52,17 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
-          # Add appropriate liveness and readiness probes for location-service
-          # For example, if it has a /health endpoint:
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Or your specific health check endpoint
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /actuator/health # Or your specific health check endpoint
-          #     port: http
           resources:
-            {{- .Values.locationService.resources | toYaml | nindent 12 }}
-      {{- with .Values.locationService.nodeSelector }}
+            {{- .Values.messagingService.resources | toYaml | nindent 12 }}
+      {{- with .Values.messagingService.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.locationService.affinity }}
+      {{- with .Values.messagingService.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.locationService.tolerations }}
+      {{- with .Values.messagingService.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
