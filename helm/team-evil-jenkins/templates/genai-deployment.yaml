@@ -1,0 +1,39 @@
+{{- if .Values.genai.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genai-deployment
+  labels:
+    {{- include "team-evil-jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: genai
+spec:
+  replicas: {{ .Values.genai.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "team-evil-jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: genai
+  template:
+    metadata:
+      labels:
+        {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: genai
+    spec:
+      containers:
+        - name: genai
+          image: "{{ .Values.genai.image.repository }}:{{ .Values.genai.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.genai.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            {{- toYaml .Values.genai.resources | nindent 12 }}
+{{- end }}

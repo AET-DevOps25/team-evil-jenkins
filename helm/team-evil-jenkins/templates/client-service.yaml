@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "team-evil-jenkins.fullname" . }}-client
+  name: client
   labels:
     {{- include "team-evil-jenkins.labels" . | nindent 4 }}
     app.kubernetes.io/component: client

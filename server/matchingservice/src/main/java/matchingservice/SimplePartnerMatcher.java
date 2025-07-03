@@ -1,12 +1,11 @@
 package matchingservice;
 
-import org.springframework.stereotype.Component;
+// Deprecated dummy matcher; component annotation removed
 
 import model.IPartnerMatcher;
 import model.User;
 import model.Sport;
 
-@Component
 public class SimplePartnerMatcher implements IPartnerMatcher {
 
     @Override
