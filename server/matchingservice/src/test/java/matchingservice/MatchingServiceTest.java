@@ -40,6 +40,6 @@ class MatchingServiceTest {
         when(userServiceClient.getUser("u2")).thenReturn(carol);
 
         User partner = matchingService.findPartner("u0");
-        assertEquals("u2", partner.getId());
+        assertEquals("u2", partner.id());
     }
 }
