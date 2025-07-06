@@ -84,6 +84,7 @@ genai:
     type: ClusterIP
     port: 80 # Service port
   resources: {}
+  env: {}
 
 # Ingress configuration
 ingress:
