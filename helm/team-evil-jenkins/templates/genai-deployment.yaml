@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: genai
-          image: "{{ .Values.genai.image.repository }}:{{ .Values.genai.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.genai.image.repository }}:{{ .Values.genai.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.genai.image.pullPolicy }}
           ports:
             - name: http
@@ -34,6 +34,11 @@ spec:
             httpGet:
               path: /health
               port: http
+          env:
+            - name: OPENWEBUI_URL
+              value: "{{ .Values.genai.env.OPENWEBUI_URL | default  }}"
+            - name: OPENWEBUI_API_KEY
+              value: "{{ .Values.genai.env.OPENWEBUI_API_KEY | default  }}"
           resources:
             {{- toYaml .Values.genai.resources | nindent 12 }}
 {{- end }}

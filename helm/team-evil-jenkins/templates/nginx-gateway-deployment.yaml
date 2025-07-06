@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-gateway-deployment
+  labels:
+    {{- include "team-evil-jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx-gateway
+spec:
+  replicas: {{ .Values.nginxGateway.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "team-evil-jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: nginx-gateway
+  template:
+    metadata:
+      labels:
+        {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: nginx-gateway
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nginx-gateway
+          image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.nginxGateway.image.repository }}:{{ .Values.nginxGateway.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            {{- .Values.nginxGateway.resources | toYaml | nindent 12 }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: nginx-config
+              mountPath: /etc/nginx/oidc.lua
+              subPath: oidc.lua
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-gateway-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+              - key: oidc.lua
+                path: oidc.lua
