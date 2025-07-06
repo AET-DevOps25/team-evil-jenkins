@@ -84,6 +84,9 @@ genai:
     type: ClusterIP
     port: 80 # Service port
   resources: {}
+  env: 
+    OPENWEBUI_URL: ""
+    OPENWEBUI_API_KEY: ""
 
 # Ingress configuration
 ingress:
