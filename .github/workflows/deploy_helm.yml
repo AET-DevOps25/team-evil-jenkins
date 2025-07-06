@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - main
-
+on:
+  workflow_run:
+    workflows: ["Build Docker Images"]
+    types:
+      - completed
 jobs:
   deploy:
     runs-on: ubuntu-latest
