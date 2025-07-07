@@ -92,6 +92,7 @@ jobs:
           retention-days: 1
 
   publish-docker-images:
+
     name: Build and publish Docker Images
     needs: [java-build, build-react-frontend]
     runs-on: ubuntu-latest
@@ -101,6 +102,9 @@ jobs:
           - name: client          
             path: ./client
             is_client: true
+
+          - name: postgres
+            path: ./postgres #TODO: how where to store previous contents of the DB ? 
 
           - name: location-service    
             path: ./server/locationservice
