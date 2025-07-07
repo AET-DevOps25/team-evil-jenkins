@@ -67,6 +67,13 @@ serviceAccount:
   annotations: {}
 
 # Configuration for the GenAI service
+nginxGateway:
+  replicaCount: 1
+  image:
+    repository: team-evil-jenkins/nginx-gateway
+    tag: latest
+  resources: {}
+
 genai:
   enabled: true
   replicaCount: 1
@@ -77,6 +84,9 @@ genai:
     type: ClusterIP
     port: 80 # Service port
   resources: {}
+  env: 
+    OPENWEBUI_URL: ""
+    OPENWEBUI_API_KEY: ""
 
 # Ingress configuration
 ingress:

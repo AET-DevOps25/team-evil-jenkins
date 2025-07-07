@@ -34,21 +34,21 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: user-service
+                name: nginx-gateway
                 port:
-                  number: 8080
+                  number: 80
           - path: /locations
             pathType: Prefix
             backend:
               service:
-                name: location-service
+                name: nginx-gateway
                 port:
-                  number: 8080
+                  number: 80
           - path: /genai
             pathType: Prefix
             backend:
               service:
-                name: genai
+                name: nginx-gateway
                 port:
                   number: 80
 {{- end }}

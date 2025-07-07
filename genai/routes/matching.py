@@ -41,3 +41,6 @@ async def match(req: MatchRequest) -> MatchResponse:  # noqa: D401  (simple func
         return MatchResponse(ranked_ids=ranked)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=f"Matching failed: {exc}") from exc
+@router.get("/health")
+def health():
+    return {"status": "ok"}

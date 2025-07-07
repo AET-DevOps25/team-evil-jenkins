@@ -131,6 +131,11 @@ jobs:
             jar_download_target_dir: server/messagingservice/build/libs
             gradle_project_name: messagingservice
 
+          - name: nginx-gateway
+            path: ./nginx
+            jar_download_target_dir: ""
+            gradle_project_name: ""
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
