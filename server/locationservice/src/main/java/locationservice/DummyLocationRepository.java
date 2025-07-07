@@ -63,8 +63,8 @@ public class DummyLocationRepository implements LocationRepository {
         
         return dummyUsers.stream()
             .filter(u -> {
-                Location loc = locationMap.get(u.getId());
-                if (loc == null || u.getId().equals(userId)) return false;
+                Location loc = locationMap.get(u.id());
+                if (loc == null || u.id().equals(userId)) return false;
                 double dist = haversine(lat1, lon1, loc.getLatitude(), loc.getLongitude());
                 return dist <= radius;
             })

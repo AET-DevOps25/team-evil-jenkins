@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-import model.User;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,12 +31,12 @@ public class UserController {
     @Operation(summary = "Get a user by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the user", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)) }),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)) }),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content) })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(
+    public ResponseEntity<UserEntity> getUserById(
             @Parameter(description = "ID of user to be searched") @PathVariable("id") String id) {
-        User user = userService.getUserById(id);
+                UserEntity user = userService.getUserById(id);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -52,7 +51,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid user supplied",
                     content = @Content) })
     @PostMapping
-    public ResponseEntity<String> addUser(@RequestBody User user) {
+    public ResponseEntity<String> addUser(@RequestBody UserEntity user) {
         userService.addUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully");
     }
@@ -60,9 +59,9 @@ public class UserController {
     @Operation(summary = "Get all users")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = User.class))))
+                    array = @ArraySchema(schema = @Schema(implementation = UserEntity.class))))
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserEntity>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
     @Operation(summary = "Delete a user by their ID")

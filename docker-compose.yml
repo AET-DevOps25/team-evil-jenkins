@@ -1,4 +1,13 @@
 services:
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   nginx:
     build: ./nginx
     container_name: api-gateway
@@ -23,7 +32,11 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=development
-
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_service_db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=your_secure_password
+    depends_on:
+      - postgres
 
   location-service:
     build:
@@ -31,6 +44,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8081:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/location_service_db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=your_secure_password
+    depends_on:
+      - postgres    
 
   messaging-service:
     build:
@@ -38,6 +57,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8082:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/messaging_service_db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=your_secure_password
+    depends_on:
+      - postgres    
 
   matching-service:
     build:
@@ -45,7 +70,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8083:8080"
-
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/matching_service_db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=your_secure_password
+    depends_on:
+      - postgres
+      
   client:
     build: ./client
     ports:
@@ -100,5 +131,6 @@ services:
 
 
 volumes: # TODO: add volumes for database and maybe other services
+  postgres_data:
   prometheus_data:
   grafana-storage:

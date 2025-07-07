@@ -23,20 +23,20 @@ public class MatchingService {
         // fetch user profile from user-service
         User user = userServiceClient.getUser(userId);
         if (user == null) {
-            return new User();
+            return null;
         }
-        String userProfile = user.getName();
+        String userProfile = user.name();
         // fetch candidate users (simple: all users except current)
         List<User> allUsers = userServiceClient.getAllUsers();
         List<Candidate> candidates = allUsers.stream()
-                .filter(u -> !u.getId().equals(userId))
-                .map(u -> new Candidate(u.getId(), u.getName()))
+                .filter(u -> !u.id().equals(userId))
+                .map(u -> new Candidate(u.id(), u.name()))
                 .toList();
         List<String> ranked = genAiClient.getRankedIds(userProfile, candidates);
         if (!ranked.isEmpty()) {
             String bestId = ranked.get(0);
             return userServiceClient.getUser(bestId);
         }
-        return new User();
+        return null;
     }
 }
