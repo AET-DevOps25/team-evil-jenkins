@@ -1,9 +1,10 @@
 server:
-  port: 8080
+  port: 8081
 
+# All Spring-related properties are nested under a single 'spring' key
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/location_service_db
+    url: jdbc:postgresql://postgres-db:5432/location_service_db
     username: location_service_admin
     password: your_secure_password
   jpa:
@@ -17,6 +18,7 @@ spring:
   profiles:
     active: development
 
+# All management properties are nested under a single 'management' key
 management:
   endpoints:
     web:
@@ -29,24 +31,8 @@ management:
 my-service:
   message: Hello from Default Profile!
 
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/user_service_db
-    username: user_service_admin
-    password: your_secure_password
-  
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-  
-  profiles:
-    active: development
 ---
+# This section for profile-specific overrides remains the same
 spring:
   config:
     activate:
