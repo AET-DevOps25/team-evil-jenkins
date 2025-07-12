@@ -1,6 +1,22 @@
 server:
   port: 8080
 
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/location_service_db
+    username: location_service_admin
+    password: your_secure_password
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  profiles:
+    active: development
+
 management:
   endpoints:
     web:
@@ -13,24 +29,5 @@ management:
 my-service:
   message: Hello from Default Profile!
 
-spring:
-  profiles:
-    active: development
----
+# Removed duplicate 'spring:' block here. Only one 'spring:' block in the first document.
 
-spring:
-  config:
-    activate:
-      on-profile: development
-
-my-service:
-  message: Hello from Development!
-
----
-spring:
-  config:
-    activate:
-      on-profile: production
-
-my-service:
-  message: Hello from Production!

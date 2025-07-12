@@ -51,4 +51,11 @@ spec:
                 name: nginx-gateway
                 port:
                   number: 80
+          - path: /matching
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-gateway
+                port:
+                  number: 80        
 {{- end }}

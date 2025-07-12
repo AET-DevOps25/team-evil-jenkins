@@ -1,10 +1,6 @@
 package locationservice;
 
 import org.springframework.stereotype.Service;
-import java.time.Instant;
-import java.util.List;
-import model.Location;
-import model.User;
 
 @Service
 public class LocationService {
@@ -14,25 +10,29 @@ public class LocationService {
         this.repository = repository;
     }
 
-    public Location updateLocation(String userId, double latitude, double longitude) {
-        Location loc = new Location(userId, latitude, longitude, Instant.now());
-        repository.saveLocation(loc);
-        return loc;
+    public LocationEntity updateLocation(String id, String name, double latitude, double longitude) {
+        LocationEntity entity = new LocationEntity(id, name, latitude, longitude);
+        return repository.save(entity);
     }
 
-    public List<User> searchPartnerByArea(String userId, double radiusKm) {
-        return repository.findUsersWithinRadius(userId, radiusKm);
+    public java.util.Optional<LocationEntity> getLocation(String id) {
+        return repository.findById(id);
     }
 
-    public Location getLocation(String userId) {
-        return repository.findByUserId(userId);
-    }
-
-    public List<Location> getAll() {
+    public java.util.List<LocationEntity> getAll() {
         return repository.findAll();
     }
 
-    public boolean delete(String userId) {
-        return repository.deleteByUserId(userId);
+    public boolean delete(String id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public java.util.List<LocationEntity> searchWithinRadius(double latitude, double longitude, double radiusKm) {
+        return repository.findWithinRadius(latitude, longitude, radiusKm);
     }
 }
+
