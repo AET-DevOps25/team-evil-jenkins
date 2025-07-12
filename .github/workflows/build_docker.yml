@@ -213,3 +213,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: ${{ matrix.service_config.name == 'nginx-gateway' && 'type=registry,ref=ghcr.io/aet-devops25/team-evil-jenkins/nginx-gateway:buildcache' || '' }}
+          cache-to: ${{ matrix.service_config.name == 'nginx-gateway' && 'type=registry,ref=ghcr.io/aet-devops25/team-evil-jenkins/nginx-gateway:buildcache,mode=max' || '' }}

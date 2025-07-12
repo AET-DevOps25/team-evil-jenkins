@@ -35,6 +35,13 @@ jobs:
         with:
           version: v3.14.4
 
+      - name: Create/Update Auth0 K8s Secret
+        run: |
+          kubectl create secret generic auth0-secrets \
+            --from-literal=AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
+            --from-literal=AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }} \
+            -n team-evil-jenkins --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Helm upgrade/install
         run: |
           helm upgrade --install team-evil-jenkins ./helm/team-evil-jenkins -n team-evil-jenkins --set redeploy=$(date +%s) --debug

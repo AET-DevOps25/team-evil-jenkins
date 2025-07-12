@@ -66,14 +66,17 @@ serviceAccount:
   create: false
   annotations: {}
 
-# Configuration for the GenAI service
+# Configuration for the Nginx Gateway service
 nginxGateway:
   replicaCount: 1
   image:
     repository: team-evil-jenkins/nginx-gateway
     tag: latest
   resources: {}
-
+  auth0:
+    domain: "dev-htqjitzqp568np1f.eu.auth0.com"
+    audience: "https://dev-htqjitzqp568np1f.eu.auth0.com/api/v2/"
+# Configuration for the GenAI service
 genai:
   enabled: true
   replicaCount: 1
