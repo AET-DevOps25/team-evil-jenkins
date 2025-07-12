@@ -19,7 +19,7 @@ const Header = ({ isAuth = true }) => {
 
     return (
         <header className="header">
-            <div className="container nav-container">
+            <div className="nav-container">
                 <div className="brand">
                     <img src="/logo.png" alt="SportMatch logo" className="brand-logo" />
                     <span>SportMatch</span>

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import '../styles/ProfilePage.css';
 
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const timeSlots = ['Morning (6-12 PM)', 'Afternoon (12-6 PM)', 'Evening (6-10 PM)'];
+
 const initialState = {
     firstName: 'Lena',
     lastName: 'Martinez',
@@ -9,10 +12,7 @@ const initialState = {
     bio: 'New to San Francisco and looking for hiking buddies! Love exploring nature trails and staying active.',
     sports: ['Hiking', 'Running', 'Cycling'],
     skillLevel: 'Beginner',
-    availability: {
-        weekdays: ['Evening (6-10 PM)'],
-        weekends: ['Morning (6-12 PM)'],
-    },
+    availability: daysOfWeek.reduce((acc, d) => ({ ...acc, [d]: [] }), {}),
 };
 
 const allSports = ['Hiking', 'Running', 'Cycling', 'Swimming', 'Tennis', 'Basketball'];
@@ -34,13 +34,22 @@ function ProfilePage() {
         });
     };
 
-    const handleAvail = (period, dayType, value) => {
-        setForm((prev) => {
-            const current = new Set(prev.availability[dayType]);
-            current.has(value) ? current.delete(value) : current.add(value);
-            return { ...prev, availability: { ...prev.availability, [dayType]: Array.from(current) } };
+    const toggleTime = (day, slot) => {
+        setForm(prev => {
+            const current = new Set(prev.availability[day]);
+            current.has(slot) ? current.delete(slot) : current.add(slot);
+            return { ...prev, availability: { ...prev.availability, [day]: Array.from(current) } };
         });
     };
+
+    const toggleDay = (day) => {
+        setForm(prev => {
+            const hasAny = prev.availability[day].length > 0;
+            return { ...prev, availability: { ...prev.availability, [day]: hasAny ? [] : [...timeSlots] } };
+        });
+    };
+
+
 
     const handleSave = (e) => {
         e.preventDefault();
@@ -80,8 +89,16 @@ function ProfilePage() {
 
                     <div className="sidebar-section">
                         <h4>Availability</h4>
-                        <p>Weekends: {form.availability.weekends.join(', ') || '—'}</p>
-                        <p>Weekdays: {form.availability.weekdays.join(', ') || '—'}</p>
+                        <div className="tags">
+                            {daysOfWeek.flatMap((d) =>
+                                form.availability[d].map((slot) => (
+                                    <span key={`${d}-${slot}`} className="tag avail-tag">
+                                        🗓️ {d.slice(0, 3)} {slot.split(' ')[0]}
+                                    </span>
+                                ))
+                            )}
+                            {daysOfWeek.every((d) => form.availability[d].length === 0) && (<span className="small-text">—</span>)}
+                        </div>
                     </div>
                 </aside>
 
@@ -89,7 +106,6 @@ function ProfilePage() {
                 <div className="profile-content card">
                     <h2>Edit Profile</h2>
                     <p className="subtitle">Update your information to find better matches</p>
-
                     <form onSubmit={handleSave} className="profile-form">
                         <div className="two-col">
                             <div className="form-group">
@@ -153,64 +169,66 @@ function ProfilePage() {
                             </div>
                         </fieldset>
 
-                        <div className="form-group">
-                            <label htmlFor="skillLevel">Skill Level</label>
-                            <select
-                                id="skillLevel"
-                                name="skillLevel"
-                                value={form.skillLevel}
-                                onChange={handleInput}
-                            >
-                                {skillLevels.map((level) => (
-                                    <option key={level}>{level}</option>
-                                ))}
-                            </select>
-                        </div>
-
                         <fieldset className="form-group">
-                            <legend>Availability</legend>
-                            <div className="availability-grid">
-                                <div>
-                                    <h5>Weekdays</h5>
-                                    {['Morning (6-12 PM)', 'Afternoon (12-6 PM)', 'Evening (6-10 PM)'].map((slot) => (
-                                        <label
-                                            key={slot}
-                                            className={`checkbox-label ${form.availability.weekends.includes(slot) ? 'selected' : ''}`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={form.availability.weekends.includes(slot)}
-                                                onChange={() => handleAvail('availability', 'weekends', slot)}
-                                            />
-                                            <span>{slot}</span>
-                                        </label>
-                                    ))}
-
-                                </div>
-                                <div>
-                                    <h5>Weekends</h5>
-                                    {['Morning (6-12 PM)', 'Afternoon (12-6 PM)', 'Evening (6-10 PM)'].map((slot) => (
-                                        <label
-                                            key={slot}
-                                            className={`checkbox-label ${form.availability.weekends.includes(slot) ? 'selected' : ''}`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={form.availability.weekends.includes(slot)}
-                                                onChange={() => handleAvail('availability', 'weekends', slot)}
-                                            />
-                                            <span>{slot}</span>
-                                        </label>
-                                    ))}
-
-                                </div>
+                            <legend>Skill Level</legend>
+                            <div className="radio-group">
+                                {skillLevels.map((level) => (
+                                    <label key={level} className={`radio-label ${form.skillLevel === level ? 'selected' : ''}`}>
+                                        <input
+                                            type="radio"
+                                            name="skillLevel"
+                                            value={level}
+                                            checked={form.skillLevel === level}
+                                            onChange={handleInput}
+                                        />
+                                        <span>{level}</span>
+                                    </label>
+                                ))}
                             </div>
                         </fieldset>
 
-                        <div className="form-actions">
-                            <button type="submit" className="btn btn-primary save"><img src="/images/icon-save.svg" alt="" /> Save Profile</button>
+                    <fieldset className="form-group">
+                        <legend>Availability</legend>
+                        <div className="availability-list">
+                            {daysOfWeek.map((day) => (
+                                <div key={day} className="day-row">
+                                    <label className={`checkbox-label day-select ${form.availability[day].length > 0 ? 'selected' : ''}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={form.availability[day].length > 0}
+                                            onChange={() => toggleDay(day)}
+                                        />
+                                        <span>{day}</span>
+                                    </label>
+                                    {form.availability[day].length > 0 && (
+                                        <div className="time-options">
+                                            {timeSlots.map((slot) => (
+                                                <label
+                                                    key={slot}
+                                                    className={`checkbox-label ${form.availability[day].includes(slot) ? 'selected' : ''}`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={form.availability[day].includes(slot)}
+                                                        onChange={() => toggleTime(day, slot)}
+                                                    />
+                                                    <span className="icon-schedule" role="img" aria-label="schedule">🗓️</span>
+                                                    <span>{slot}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </fieldset>
+
+                                            <div className="form-actions">
                             <button type="button" className="btn cancel" onClick={() => setForm(initialState)}>
                                 Cancel
+                            </button>
+                            <button type="submit" className="btn btn-primary save">
+                                Save Profile
                             </button>
                         </div>
                     </form>

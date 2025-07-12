@@ -24,9 +24,10 @@ body {
 }
 
 .container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 2rem;
 }
 
 .btn {
@@ -74,7 +75,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 0;
+    width: 100%;
+    max-width: none;
+    padding: 1rem 2rem;
 }
 
 .brand {

@@ -9,7 +9,7 @@ import Footer from '../components/Footer';
 const LandingPage = () => {
   return (
     <>
-      <Header />
+      <Header isAuth={false} />
       <main>
         <HeroSection />
         <HowItWorks />

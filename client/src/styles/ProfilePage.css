@@ -13,14 +13,14 @@
 
 /* Sidebar */
 .profile-sidebar {
-  width: 260px;
+  width: 500px;
 }
 
 .avatar-wrapper {
   position: relative;
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 0.75rem;
+  width: 128px;
+  height: 128px;
+  margin: 0 auto 1rem;
 }
 
 .avatar-lg {
@@ -30,15 +30,17 @@
   object-fit: cover;
 }
 
+
 .status-badge {
   position: absolute;
-  bottom: 6px;
-  right: 6px;
-  width: 20px;
-  height: 20px;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--primary);
   border: 2px solid #fff;
+  transform: translate(30%, 30%);
 }
 
 .user-name {
@@ -62,37 +64,90 @@
   border-radius: 12px;
   padding: 0.2rem 0.75rem;
 }
+
 .status-text.active {
   background: #dafbe1;
   color: #1a7f37;
 }
 
-.sidebar-section + .sidebar-section {
+.sidebar-section+.sidebar-section {
   margin-top: 1.25rem;
 }
+
 .sidebar-section h4 {
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }
+
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.tag {
-  background: #f1f5f9;
+
+.tag,
+.avail-tag {
+  background: #e7f3ff;
   font-size: 0.75rem;
   padding: 0.2rem 0.6rem;
   border-radius: 12px;
 }
 
+.avail-tag {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+fieldset {
+  border: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1rem
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  background: #fff;
+  user-select: none
+}
+
+.radio-label.selected {
+  border-color: #22C55E;
+  background: #f0fdf4
+}
+
+.radio-label input {
+  display: none
+}
+
+.form-header {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem
+}
+
 /* Content */
 .profile-content {
   flex: 1;
+  max-width: 1500px;
 }
+
 .profile-content h2 {
   margin-top: 0;
 }
+
 .subtitle {
   margin-top: 0.25rem;
   margin-bottom: 1.5rem;
@@ -105,6 +160,7 @@
   flex-direction: column;
   margin-bottom: 1rem;
 }
+
 .profile-form input,
 .profile-form textarea,
 .profile-form select {
@@ -114,6 +170,7 @@
   font-size: 0.95rem;
   width: 100%;
 }
+
 .profile-form textarea {
   resize: vertical;
 }
@@ -122,6 +179,7 @@
   display: flex;
   gap: 1rem;
 }
+
 .two-col .form-group {
   flex: 1;
 }
@@ -131,6 +189,7 @@
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+
 .checkbox-label {
   position: relative;
   display: flex;
@@ -142,10 +201,14 @@
   font-size: 0.875rem;
   cursor: pointer;
   user-select: none;
+  background: #ffffff;
+  /* match input fields */
 }
+
 .checkbox-label input {
   display: none;
 }
+
 .checkbox-label::before {
   content: "";
   width: 16px;
@@ -153,11 +216,14 @@
   border: 2px solid #d1d5db;
   border-radius: 4px;
   flex-shrink: 0;
+  background: #ffffff;
 }
+
 .checkbox-label.selected {
   border-color: #22C55E;
   background: #f0fdf4;
 }
+
 .checkbox-label.selected::before {
   content: "\2713";
   display: flex;
@@ -169,22 +235,39 @@
   border-color: #22C55E;
 }
 
-.availability-grid {
+.availability-list {
   display: flex;
-  gap: 3rem;
+  flex-direction: column;
+  gap: 1rem;
 }
-.availability-grid h5 {
-  margin: 0 0 0.5rem;
-  font-size: 0.85rem;
+
+.day-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
+
+.day-select {
+  min-width: 120px;
+}
+
+.time-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/** old grid styles removed */
 
 .form-actions {
   margin-top: 1.5rem;
   display: flex;
-  gap: 1rem;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
+
 .form-actions .save {
-  flex: 1;
   background: #22C55E;
   border: none;
   color: #fff;
@@ -193,6 +276,7 @@
   justify-content: center;
   gap: 0.5rem;
 }
+
 .form-actions .save img {
   width: 16px;
   height: 16px;
@@ -203,8 +287,9 @@
 .btn.cancel {
   background: #ffffff;
   border: 1px solid #d1d5db;
-  color: var(--text-dark);
+  color: #111827;
 }
+
 .btn.cancel:hover {
-  background: #f9fafb;
+  background: #d1d5db;
 }
