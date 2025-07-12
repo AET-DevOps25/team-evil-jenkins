@@ -12,18 +12,18 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserEntity getUserById(String id) {
+    public User getUserById(String id) {
         // findById now returns an Optional. Use orElse(null) or throw an exception.
-        Optional<UserEntity> userOptional = userRepository.findById(id);
+        Optional<User> userOptional = userRepository.findById(id);
         return userOptional.orElse(null);
     }
 
-    public void addUser(UserEntity user) {
+    public void addUser(User user) {
         // The save method works for both creating and updating entities
         userRepository.save(user);
     }
 
-    public List<UserEntity> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 

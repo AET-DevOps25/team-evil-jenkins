@@ -31,12 +31,12 @@ public class UserController {
     @Operation(summary = "Get a user by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the user", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)) }),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)) }),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content) })
     @GetMapping("/{id}")
-    public ResponseEntity<UserEntity> getUserById(
+    public ResponseEntity<User> getUserById(
             @Parameter(description = "ID of user to be searched") @PathVariable("id") String id) {
-                UserEntity user = userService.getUserById(id);
+                User user = userService.getUserById(id);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -51,7 +51,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid user supplied",
                     content = @Content) })
     @PostMapping
-    public ResponseEntity<String> addUser(@RequestBody UserEntity user) {
+    public ResponseEntity<String> addUser(@RequestBody User user) {
         userService.addUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully");
     }
@@ -59,9 +59,9 @@ public class UserController {
     @Operation(summary = "Get all users")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = UserEntity.class))))
+                    array = @ArraySchema(schema = @Schema(implementation = User.class))))
     @GetMapping
-    public ResponseEntity<List<UserEntity>> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
     @Operation(summary = "Delete a user by their ID")

@@ -11,9 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import model.Location;
-import model.User;
+import model.LocationDTO;
+import model.UserDTO;
 
 @RestController
 @RequestMapping("/location")
@@ -21,6 +20,8 @@ import model.User;
 public class LocationController {
     @Autowired
     private LocationService locationService;
+
+    private LocationMapper dtoMapper;
 
     @Operation(
         summary = "Update a user's location",
@@ -32,12 +33,12 @@ public class LocationController {
         }
     )
     @PostMapping("/update")
-    public ResponseEntity<Location> updateLocation(
+    public ResponseEntity<LocationDTO> updateLocation( //TODO: pass just LocationDTO instead ?
             @Parameter(description = "ID of the user") @RequestParam String userId,
             @Parameter(description = "Latitude coordinate") @RequestParam double latitude,
             @Parameter(description = "Longitude coordinate") @RequestParam double longitude) {
         Location updated = locationService.updateLocation(userId, latitude, longitude);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(dtoMapper.toDTO(updated));
     }
 
     @Operation(
@@ -45,15 +46,15 @@ public class LocationController {
         description = "Returns a list of users within the specified radius (in kilometers) of the given user",
         responses = {
             @ApiResponse(responseCode = "200", description = "Search completed successfully",
-                content = @Content(schema = @Schema(implementation = User.class))),
+                content = @Content(schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found")
         }
     )
     @GetMapping("/nearby")
-    public ResponseEntity<List<User>> searchPartnerByArea(
+    public ResponseEntity<List<UserDTO>> searchPartnerByArea(
             @Parameter(description = "ID of the user") @RequestParam String userId,
             @Parameter(description = "Search radius in kilometers") @RequestParam double radius) {
-        List<User> users = locationService.searchPartnerByArea(userId, radius);
+        List<UserDTO> users = locationService.searchPartnerByArea(userId, radius);
         return ResponseEntity.ok(users);
     }
 }

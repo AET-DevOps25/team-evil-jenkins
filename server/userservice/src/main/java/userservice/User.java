@@ -12,7 +12,7 @@ import jakarta.persistence.ElementCollection;
 
 @Entity
 @Table(name = "users")
-public class UserEntity {
+public class User {
     @Id
     @Column(name = "id")
     private String id;
@@ -34,10 +34,10 @@ public class UserEntity {
     @Column(name = "sport_id")
     public List<String> sportInterestIds;
 
-    public UserEntity() {
+    public User() {
     }
 
-    public UserEntity(String id, String name) {
+    public User(String id, String name) {
         this.id = id;
         this.name = name;
     }

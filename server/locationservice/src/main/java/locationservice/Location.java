@@ -1,11 +1,31 @@
-package model;
+package locationservice;
 
 import java.time.Instant;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+
+
+@Entity
+@Table(name = "locations")
 public class Location {
+    @Id
+    @Column(name = "id") //TODO: userId vs Id ?
     private String userId;
+
+    @Column(name = "latitude")
     private double latitude;
+
+    @Column(name = "longitude")
     private double longitude;
+
+    @Column(name = "timestamp")
     private Instant timestamp;
     
     public Location() {

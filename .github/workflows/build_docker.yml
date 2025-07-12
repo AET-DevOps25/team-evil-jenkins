@@ -103,9 +103,6 @@ jobs:
             path: ./client
             is_client: true
 
-          - name: postgres
-            path: ./postgres #TODO: how where to store previous contents of the DB ? 
-
           - name: location-service    
             path: ./server/locationservice
             jar_download_target_dir: server/locationservice/build/libs

@@ -3,8 +3,9 @@ package locationservice;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
-import model.Location;
-import model.User;
+import java.util.Optional;
+
+import model.UserDTO;
 
 @Service
 public class LocationService {
@@ -16,16 +17,23 @@ public class LocationService {
 
     public Location updateLocation(String userId, double latitude, double longitude) {
         Location loc = new Location(userId, latitude, longitude, Instant.now());
-        repository.saveLocation(loc);
+        repository.save(loc);
         return loc;
     }
 
-    public List<User> searchPartnerByArea(String userId, double radiusKm) {
-        return repository.findUsersWithinRadius(userId, radiusKm);
+    public List<UserDTO> searchPartnerByArea(String userId, double radiusKm) {
+        Optional<Location> currentUserLocation = repository.findById(userId);
+        if (currentUserLocation.isEmpty()) {
+            throw new IllegalArgumentException("User does not exist!");
+            //return List.of();
+        }
+        Location loc = currentUserLocation.get();
+
+        return repository.findUsersWithinRadius(userId, loc.getLatitude(), loc.getLongitude(), radiusKm);
     }
 
     public Location getLocation(String userId) {
-        return repository.findByUserId(userId);
+        return repository.findById(userId).orElse(null);
     }
 
     public List<Location> getAll() {
@@ -33,6 +41,12 @@ public class LocationService {
     }
 
     public boolean delete(String userId) {
-        return repository.deleteByUserId(userId);
+        if( repository.existsById(userId))
+        {
+            repository.deleteById(userId);
+            return true;
+
+        }
+        return false;
     }
 }

@@ -1,14 +1,11 @@
 package locationservice;
 
-import model.Location;
-import model.User;
+import model.UserDTO;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -53,9 +50,9 @@ public class LocationControllerTest {
     public void testSearchPartnerByArea() throws Exception {
         String userId = "user1";
         double radius = 10.0;
-        List<User> nearbyUsers = Arrays.asList(
-            new User("user2", "Bob"),
-            new User("user3", "Charlie")
+        List<UserDTO> nearbyUsers = Arrays.asList(
+            new UserDTO("user2", "Bob"),
+            new UserDTO("user3", "Charlie")
         );
         
         when(locationService.searchPartnerByArea(userId, radius)).thenReturn(nearbyUsers);
