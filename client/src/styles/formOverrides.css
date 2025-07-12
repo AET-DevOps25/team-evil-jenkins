@@ -1,0 +1,18 @@
+/* Light theme overrides for form controls */
+input,
+textarea,
+select {
+  background-color: #ffffff;
+  color: #213547;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}

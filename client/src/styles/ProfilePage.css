@@ -1,0 +1,295 @@
+.profile-page {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+/* Sidebar */
+.profile-sidebar {
+  width: 500px;
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  margin: 0 auto 1rem;
+}
+
+.avatar-lg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+
+.status-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid #fff;
+  transform: translate(30%, 30%);
+}
+
+.user-name {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.location-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.status-text {
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  margin-bottom: 1rem;
+  color: var(--text-light);
+  border-radius: 12px;
+  padding: 0.2rem 0.75rem;
+}
+
+.status-text.active {
+  background: #dafbe1;
+  color: #1a7f37;
+}
+
+.sidebar-section+.sidebar-section {
+  margin-top: 1.25rem;
+}
+
+.sidebar-section h4 {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag,
+.avail-tag {
+  background: #e7f3ff;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+}
+
+.avail-tag {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+fieldset {
+  border: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1rem
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  background: #fff;
+  user-select: none
+}
+
+.radio-label.selected {
+  border-color: #22C55E;
+  background: #f0fdf4
+}
+
+.radio-label input {
+  display: none
+}
+
+.form-header {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem
+}
+
+/* Content */
+.profile-content {
+  flex: 1;
+  max-width: 1500px;
+}
+
+.profile-content h2 {
+  margin-top: 0;
+}
+
+.subtitle {
+  margin-top: 0.25rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.profile-form .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.profile-form input,
+.profile-form textarea,
+.profile-form select {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.profile-form textarea {
+  resize: vertical;
+}
+
+.two-col {
+  display: flex;
+  gap: 1rem;
+}
+
+.two-col .form-group {
+  flex: 1;
+}
+
+.checkbox-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.checkbox-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  user-select: none;
+  background: #ffffff;
+  /* match input fields */
+}
+
+.checkbox-label input {
+  display: none;
+}
+
+.checkbox-label::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+
+.checkbox-label.selected {
+  border-color: #22C55E;
+  background: #f0fdf4;
+}
+
+.checkbox-label.selected::before {
+  content: "\2713";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  background: #22C55E;
+  border-color: #22C55E;
+}
+
+.availability-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.day-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.day-select {
+  min-width: 120px;
+}
+
+.time-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/** old grid styles removed */
+
+.form-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.form-actions .save {
+  background: #22C55E;
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.form-actions .save img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+/* Buttons reuse existing .btn styles from LandingPage.css */
+.btn.cancel {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+}
+
+.btn.cancel:hover {
+  background: #d1d5db;
+}
