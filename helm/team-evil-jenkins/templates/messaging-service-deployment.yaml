@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-service-deployment
+  labels:
+    {{- include "team-evil-jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: messaging-service
+spec:
+  replicas: {{ .Values.messagingService.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "team-evil-jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: messaging-service
+  template:
+    metadata:
+      labels:
+        {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: messaging-service
+      annotations:
+        redeploy-timestamp: "{{ .Values.redeploy | default "" }}"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
+      securityContext:
+        {{- .Values.messagingService.podSecurityContext | toYaml | nindent 8 }}
+      containers:
+        - name: messaging-service
+          securityContext:
+            {{- .Values.messagingService.securityContext | toYaml | nindent 12 }}
+          image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.messagingService.image.repository }}:{{ .Values.messagingService.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.messagingService.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- .Values.messagingService.resources | toYaml | nindent 12 }}
+      {{- with .Values.messagingService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.messagingService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.messagingService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

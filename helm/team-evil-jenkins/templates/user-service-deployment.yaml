@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "team-evil-jenkins.fullname" . }}-user-service
+  name: user-service-deployment
   labels:
     {{- include "team-evil-jenkins.labels" . | nindent 4 }}
     app.kubernetes.io/component: user-service
@@ -16,6 +16,8 @@ spec:
       labels:
         {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: user-service
+      annotations:
+        redeploy-timestamp: "{{ .Values.redeploy | default "" }}"
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -36,7 +38,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /api/actuator/health
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -44,7 +46,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /api/actuator/health
               port: http
             initialDelaySeconds: 45
             periodSeconds: 10
