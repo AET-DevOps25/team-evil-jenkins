@@ -28,6 +28,21 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          env:
+            - name: AUTH0_DOMAIN
+              value: "{{ .Values.nginxGateway.auth0.domain }}"
+            - name: AUTH0_AUDIENCE
+              value: "{{ .Values.nginxGateway.auth0.audience }}"
+            - name: AUTH0_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secrets
+                  key: AUTH0_CLIENT_ID
+            - name: AUTH0_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secrets
+                  key: AUTH0_CLIENT_SECRET
           resources:
             {{- .Values.nginxGateway.resources | toYaml | nindent 12 }}
           volumeMounts:
