@@ -169,7 +169,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: react-client-build-artifact
-          path: ./client 
+          path: ./client/dist
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
