@@ -12,8 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import model.Location;
-import model.User;
 
 @RestController
 @RequestMapping("/location")
@@ -23,37 +21,68 @@ public class LocationController {
     private LocationService locationService;
 
     @Operation(
-        summary = "Update a user's location",
-        description = "Updates the current location of a user identified by userId",
+        summary = "Update or create a user's location",
+        description = "Updates or creates the current location of a user identified by id and name",
         responses = {
             @ApiResponse(responseCode = "200", description = "Location updated successfully",
-                content = @Content(schema = @Schema(implementation = Location.class))),
+                content = @Content(schema = @Schema(implementation = LocationEntity.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input parameters")
         }
     )
     @PostMapping("/update")
-    public ResponseEntity<Location> updateLocation(
-            @Parameter(description = "ID of the user") @RequestParam String userId,
+    public ResponseEntity<LocationEntity> updateLocation(
+            @Parameter(description = "ID of the user") @RequestParam String id,
+            @Parameter(description = "Name of the user") @RequestParam String name,
             @Parameter(description = "Latitude coordinate") @RequestParam double latitude,
             @Parameter(description = "Longitude coordinate") @RequestParam double longitude) {
-        Location updated = locationService.updateLocation(userId, latitude, longitude);
+        LocationEntity updated = locationService.updateLocation(id, name, latitude, longitude);
         return ResponseEntity.ok(updated);
     }
 
     @Operation(
-        summary = "Find users near a given user within a radius",
-        description = "Returns a list of users within the specified radius (in kilometers) of the given user",
+        summary = "Get all locations",
+        description = "Returns all location records in the database",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "List of locations",
+                content = @Content(schema = @Schema(implementation = LocationEntity.class)))
+        }
+    )
+    @GetMapping("/all")
+    public ResponseEntity<java.util.List<LocationEntity>> getAllLocations() {
+        return ResponseEntity.ok(locationService.getAll());
+    }
+
+    @Operation(
+        summary = "Get location by user ID",
+        description = "Returns the location of a user by their ID",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Location found",
+                content = @Content(schema = @Schema(implementation = LocationEntity.class))),
+            @ApiResponse(responseCode = "404", description = "Location not found")
+        }
+    )
+    @GetMapping("/{id}")
+    public ResponseEntity<LocationEntity> getLocationById(
+            @Parameter(description = "ID of the user") @PathVariable String id) {
+        return locationService.getLocation(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(
+        summary = "Find locations near a given point within a radius",
+        description = "Returns a list of locations within the specified radius (in kilometers) of the given coordinates",
         responses = {
             @ApiResponse(responseCode = "200", description = "Search completed successfully",
-                content = @Content(schema = @Schema(implementation = User.class))),
-            @ApiResponse(responseCode = "404", description = "User not found")
+                content = @Content(schema = @Schema(implementation = LocationEntity.class)))
         }
     )
     @GetMapping("/nearby")
-    public ResponseEntity<List<User>> searchPartnerByArea(
-            @Parameter(description = "ID of the user") @RequestParam String userId,
+    public ResponseEntity<java.util.List<LocationEntity>> searchNearby(
+            @Parameter(description = "Latitude coordinate") @RequestParam double latitude,
+            @Parameter(description = "Longitude coordinate") @RequestParam double longitude,
             @Parameter(description = "Search radius in kilometers") @RequestParam double radius) {
-        List<User> users = locationService.searchPartnerByArea(userId, radius);
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(locationService.searchWithinRadius(latitude, longitude, radius));
     }
 }
+
