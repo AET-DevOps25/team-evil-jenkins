@@ -49,7 +49,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=your_secure_password
     depends_on:
-      - postgres    
+      - postgres
 
   messaging-service:
     build:
@@ -62,7 +62,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=your_secure_password
     depends_on:
-      - postgres    
+      - postgres
 
   matching-service:
     build:
@@ -76,11 +76,11 @@ services:
       - SPRING_DATASOURCE_PASSWORD=your_secure_password
     depends_on:
       - postgres
-      
+
   client:
     build: ./client
     ports:
-      - "3000:80"
+      - "3000:3000"
 
   genai:
     build: ./genai
@@ -92,10 +92,10 @@ services:
     depends_on:
       - matching-service
 
-  prometheus: 
+  prometheus:
     image: prom/prometheus:v2.52.0
     container_name: prometheus
-    ports: 
+    ports:
       - "9090:9090"
     volumes:
       - ./prometheus:/etc/prometheus
@@ -128,9 +128,8 @@ services:
       - prometheus
     restart: unless-stopped
 
-
-
-volumes: # TODO: add volumes for database and maybe other services
+volumes:
+  # TODO: add volumes for database and maybe other services
   postgres_data:
   prometheus_data:
   grafana-storage:
