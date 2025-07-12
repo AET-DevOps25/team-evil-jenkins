@@ -30,14 +30,14 @@ spec:
     - host: {{ .Values.ingress.api.host | quote }}
       http:
         paths:
-          - path: /users
+          - path: /user
             pathType: Prefix
             backend:
               service:
                 name: nginx-gateway
                 port:
                   number: 80
-          - path: /locations
+          - path: /location
             pathType: Prefix
             backend:
               service:
@@ -51,4 +51,11 @@ spec:
                 name: nginx-gateway
                 port:
                   number: 80
+          - path: /matching
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-gateway
+                port:
+                  number: 80        
 {{- end }}

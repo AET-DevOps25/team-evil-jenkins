@@ -29,11 +29,11 @@ public class LocationController {
     }
 
     @Operation(
-        summary = "Update a user's location",
-        description = "Updates the current location of a user identified by userId",
+        summary = "Update or create a user's location",
+        description = "Updates or creates the current location of a user identified by id and name",
         responses = {
             @ApiResponse(responseCode = "200", description = "Location updated successfully",
-                content = @Content(schema = @Schema(implementation = Location.class))),
+                content = @Content(schema = @Schema(implementation = LocationEntity.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input parameters")
         }
     )
@@ -60,8 +60,38 @@ public class LocationController {
     }
 
     @Operation(
-        summary = "Find users near a given user within a radius",
-        description = "Returns a list of users within the specified radius (in kilometers) of the given user",
+        summary = "Get all locations",
+        description = "Returns all location records in the database",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "List of locations",
+                content = @Content(schema = @Schema(implementation = LocationEntity.class)))
+        }
+    )
+    @GetMapping("/all")
+    public ResponseEntity<java.util.List<LocationEntity>> getAllLocations() {
+        return ResponseEntity.ok(locationService.getAll());
+    }
+
+    @Operation(
+        summary = "Get location by user ID",
+        description = "Returns the location of a user by their ID",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Location found",
+                content = @Content(schema = @Schema(implementation = LocationEntity.class))),
+            @ApiResponse(responseCode = "404", description = "Location not found")
+        }
+    )
+    @GetMapping("/{id}")
+    public ResponseEntity<LocationEntity> getLocationById(
+            @Parameter(description = "ID of the user") @PathVariable String id) {
+        return locationService.getLocation(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(
+        summary = "Find locations near a given point within a radius",
+        description = "Returns a list of locations within the specified radius (in kilometers) of the given coordinates",
         responses = {
             @ApiResponse(responseCode = "200", description = "Search completed successfully",
                 content = @Content(schema = @Schema(implementation = UserDTO.class))),
@@ -76,3 +106,4 @@ public class LocationController {
         return ResponseEntity.ok(users);
     }
 }
+

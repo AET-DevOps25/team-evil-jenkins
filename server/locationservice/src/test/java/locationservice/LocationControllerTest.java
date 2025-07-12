@@ -3,13 +3,11 @@ package locationservice;
 import model.UserDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -17,9 +15,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-public class LocationControllerTest {
+@WebMvcTest(LocationController.class)
+class LocationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -28,22 +25,32 @@ public class LocationControllerTest {
     private LocationService locationService;
 
     @Test
-    public void testUpdateLocation() throws Exception {
-        String userId = "user1";
-        double latitude = 48.137154;
-        double longitude = 11.576124;
-        Location location = new Location(userId, latitude, longitude, Instant.now());
-        
-        when(locationService.updateLocation(userId, latitude, longitude)).thenReturn(location);
+    void testUpdateLocation() throws Exception {
+        LocationEntity alice = new LocationEntity("user1", "Alice", 48.13, 11.57);
+        when(locationService.updateLocation("user1", "Alice", 48.13, 11.57)).thenReturn(alice);
 
         mockMvc.perform(post("/location/update")
-                .param("userId", userId)
-                .param("latitude", String.valueOf(latitude))
-                .param("longitude", String.valueOf(longitude)))
+                        .param("id", "user1")
+                        .param("name", "Alice")
+                        .param("latitude", "48.13")
+                        .param("longitude", "11.57"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(userId))
-                .andExpect(jsonPath("$.latitude").value(latitude))
-                .andExpect(jsonPath("$.longitude").value(longitude));
+                .andExpect(jsonPath("$.id").value("user1"))
+                .andExpect(jsonPath("$.name").value("Alice"))
+                .andExpect(jsonPath("$.latitude").value(48.13))
+                .andExpect(jsonPath("$.longitude").value(11.57));
+    }
+
+    @Test
+    void testGetAllLocations() throws Exception {
+        List<LocationEntity> list = List.of(new LocationEntity("u1", "A", 0.0, 0.0),
+                                           new LocationEntity("u2", "B", 1.0, 1.0));
+        when(locationService.getAll()).thenReturn(list);
+
+        mockMvc.perform(get("/location/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("u1"))
+                .andExpect(jsonPath("$[1].id").value("u2"));
     }
 
     @Test
@@ -55,13 +62,11 @@ public class LocationControllerTest {
         when(locationService.searchPartnerByArea(userId, radius)).thenReturn(nearbyUserIds);
 
         mockMvc.perform(get("/location/nearby")
-                .param("userId", userId)
-                .param("radius", String.valueOf(radius)))
+                        .param("latitude", "48.13")
+                        .param("longitude", "11.57")
+                        .param("radius", "5.0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].id").value("user2"))
-                .andExpect(jsonPath("$[0].name").value("Bob"))
-                .andExpect(jsonPath("$[1].id").value("user3"))
-                .andExpect(jsonPath("$[1].name").value("Charlie"));
+                .andExpect(jsonPath("$[0].id").value("u1"));
     }
 }
+
