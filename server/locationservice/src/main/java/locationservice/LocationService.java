@@ -36,7 +36,7 @@ public class LocationService {
         return repository.findById(userId).orElse(null);
     }
 
-    public java.util.List<LocationEntity> getAll() {
+    public java.util.List<Location> getAll() {
         return repository.findAll();
     }
 
