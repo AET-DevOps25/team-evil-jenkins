@@ -213,3 +213,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: ${{ matrix.service_config.name == 'nginx-gateway' && format('type=registry,ref=ghcr.io/{0}/{1}:buildcache', github.repository, matrix.service_config.name) || '' }}
+          cache-to: ${{ matrix.service_config.name == 'nginx-gateway' && format('type=registry,ref=ghcr.io/{0}/{1}:buildcache,mode=max', github.repository, matrix.service_config.name) || '' }}
