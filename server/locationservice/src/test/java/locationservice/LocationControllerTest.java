@@ -50,12 +50,9 @@ public class LocationControllerTest {
     public void testSearchPartnerByArea() throws Exception {
         String userId = "user1";
         double radius = 10.0;
-        List<UserDTO> nearbyUsers = Arrays.asList(
-            new UserDTO("user2", "Bob"),
-            new UserDTO("user3", "Charlie")
-        );
+        List<String> nearbyUserIds = Arrays.asList("user2", "user3");
         
-        when(locationService.searchPartnerByArea(userId, radius)).thenReturn(nearbyUsers);
+        when(locationService.searchPartnerByArea(userId, radius)).thenReturn(nearbyUserIds);
 
         mockMvc.perform(get("/location/nearby")
                 .param("userId", userId)

@@ -21,7 +21,7 @@ public class LocationService {
         return loc;
     }
 
-    public List<UserDTO> searchPartnerByArea(String userId, double radiusKm) {
+    public List<String> searchPartnerByArea(String userId, double radiusKm) {
         Optional<Location> currentUserLocation = repository.findById(userId);
         if (currentUserLocation.isEmpty()) {
             throw new IllegalArgumentException("User does not exist!");
@@ -29,7 +29,7 @@ public class LocationService {
         }
         Location loc = currentUserLocation.get();
 
-        return repository.findUsersWithinRadius(userId, loc.getLatitude(), loc.getLongitude(), radiusKm);
+        return repository.findNearbyUserIds(userId, loc.getLatitude(), loc.getLongitude(), radiusKm);
     }
 
     public Location getLocation(String userId) {

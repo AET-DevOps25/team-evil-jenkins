@@ -13,8 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import model.UserDTO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -77,4 +79,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
+
+    @GetMapping("/{id}/nearby")
+    public ResponseEntity<List<UserDTO>> getNearbyUsers( //TODO: Use UserMapper ???
+            @PathVariable("id") String id,
+            @RequestParam double radius) {
+        List<User> users = userService.findNearbyUsers(id, radius);
+        List<UserDTO> dtos = users.stream()
+        .map(user -> new UserDTO(user.getId(), user.getName()))
+        .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
 }

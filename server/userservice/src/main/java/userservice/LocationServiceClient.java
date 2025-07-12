@@ -8,6 +8,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -24,29 +25,27 @@ public class LocationServiceClient {
         this.locationServiceUrl = locationServiceUrl;
     }
 
-    // public LocationDTO updateLocation(String userId, double latitude, double longitude) {
-    //     String url = UriComponentsBuilder.fromHttpUrl(locationServiceUrl)
-    //             .path("/location/update")
-    //             .queryParam("userId", userId)
-    //             .queryParam("latitude", latitude)
-    //             .queryParam("longitude", longitude)
-    //             .toUriString();
+    public LocationDTO getLocationByUserId(String userId) {
+        try {
+            String url = locationServiceUrl + "/location/" + userId;
+            return restTemplate.getForObject(url, LocationDTO.class);
+        } catch (HttpClientErrorException.NotFound e) {
+            return null;
+        }
+    }
 
-    //     return restTemplate.postForObject(url, null, Location.class);
-    // }
-
-    public List<UserDTO> searchPartnerByArea(String userId, double radius) {
+    public List<String> searchPartnerByArea(String userId, double radius) {
         String url = locationServiceUrl + "/location/nearby?userId={userId}&radius={radius}";
 
-        ResponseEntity<List<UserDTO>> response = restTemplate.exchange(
+        ResponseEntity<List<String>> response = restTemplate.exchange(
             url,
             HttpMethod.GET,
             null,
-            new ParameterizedTypeReference<List<UserDTO>>() {},
+            new ParameterizedTypeReference<List<String>>() {},
             userId,
             radius
         );
-
+        
         return response.getBody();
     }
 }

@@ -21,9 +21,6 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "location_id")
-    private String locationId;
-
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_group_ids", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "group_id")
@@ -57,14 +54,6 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getLocationId() {
-        return locationId;
-    }
-
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
     }
 
     public List<String> getGroupIds() {

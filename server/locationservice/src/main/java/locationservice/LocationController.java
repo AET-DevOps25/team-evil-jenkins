@@ -18,10 +18,15 @@ import model.UserDTO;
 @RequestMapping("/location")
 @Tag(name = "Location API", description = "Endpoints for updating and searching user locations")
 public class LocationController {
-    @Autowired
     private LocationService locationService;
 
     private LocationMapper dtoMapper;
+
+    @Autowired
+    public LocationController(LocationService locationService, LocationMapper locationMapper) {
+        this.locationService = locationService;
+        this.dtoMapper = locationMapper;
+    }
 
     @Operation(
         summary = "Update a user's location",
@@ -41,6 +46,19 @@ public class LocationController {
         return ResponseEntity.ok(dtoMapper.toDTO(updated));
     }
 
+    @Operation(summary = "Get a user's last known location by their ID")
+    @GetMapping("/{userId}")
+    public ResponseEntity<LocationDTO> getLocation(
+            @Parameter(description = "ID of the user") @PathVariable String userId) {
+        
+        Location location = locationService.getLocation(userId);
+        if (location != null) {
+            return ResponseEntity.ok(dtoMapper.toDTO(location));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @Operation(
         summary = "Find users near a given user within a radius",
         description = "Returns a list of users within the specified radius (in kilometers) of the given user",
@@ -51,10 +69,10 @@ public class LocationController {
         }
     )
     @GetMapping("/nearby")
-    public ResponseEntity<List<UserDTO>> searchPartnerByArea(
+    public ResponseEntity<List<String>> searchPartnerByArea(
             @Parameter(description = "ID of the user") @RequestParam String userId,
             @Parameter(description = "Search radius in kilometers") @RequestParam double radius) {
-        List<UserDTO> users = locationService.searchPartnerByArea(userId, radius);
+        List<String> users = locationService.searchPartnerByArea(userId, radius);
         return ResponseEntity.ok(users);
     }
 }

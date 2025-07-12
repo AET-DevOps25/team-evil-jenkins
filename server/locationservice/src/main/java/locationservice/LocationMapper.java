@@ -2,7 +2,9 @@ package locationservice;
 
 import model.DTOEntityMapper;
 import model.LocationDTO;
+import org.springframework.stereotype.Component;
 
+@Component
 public class LocationMapper implements DTOEntityMapper<Location, LocationDTO>{
 
     @Override

@@ -24,29 +24,21 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-
     show-sql: true
-
     hibernate:
       ddl-auto: update
 
   profiles:
     active: development
 ---
-
 spring:
   config:
     activate:
-      on-profile: development
+      on-profile: "development,production"
 
 my-service:
-  message: Hello from Development!
+  message: Hello from a non-default profile!
 
----
-spring:
-  config:
-    activate:
-      on-profile: production
-
-my-service:
-  message: Hello from Production!
+location:
+  service:
+    url: http://locationservice:8081
