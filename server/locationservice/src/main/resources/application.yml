@@ -1,11 +1,9 @@
 server:
-  port: 8081
+  port: 8080
 
 # All Spring-related properties are nested under a single 'spring' key
 spring:
   datasource:
-    url: jdbc:postgresql://postgres-db:5432/location_service_db
-    username: location_service_admin
     url: jdbc:postgresql://localhost:5432/location_service_db
     username: admin
     password: your_secure_password
