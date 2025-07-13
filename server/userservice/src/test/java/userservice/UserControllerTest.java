@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,7 +55,7 @@ public class UserControllerTest {
 
     @Test
     public void testAddUser() throws Exception {
-        UserDTO user = new UserDTO("1", "Alice");
+        UserDTO user = new UserDTO("1", "Alice", new ArrayList<String>());
 
         mockMvc.perform(post("/user")
                 .contentType(MediaType.APPLICATION_JSON)
