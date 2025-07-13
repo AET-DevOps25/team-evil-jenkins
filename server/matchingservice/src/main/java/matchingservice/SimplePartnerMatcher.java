@@ -3,13 +3,13 @@ package matchingservice;
 // Deprecated dummy matcher; component annotation removed
 
 import model.IPartnerMatcher;
-import model.User;
-import model.Sport;
+import model.UserDTO;
+import model.SportDTO;
 
 public class SimplePartnerMatcher implements IPartnerMatcher {
 
     @Override
-    public User findPartner(User user, Sport sport) {
+    public UserDTO findPartner(UserDTO user, SportDTO sport) {
         // Dummy partner matching implementation
         return null;//new User();
     }

@@ -2,7 +2,7 @@ package matchingservice;
 
 import org.springframework.stereotype.Service;
 
-import model.User;
+import model.UserDTO;
 import matchingservice.client.GenAiClient;
 import matchingservice.client.UserServiceClient;
 import matchingservice.dto.Candidate;
@@ -19,15 +19,15 @@ public class MatchingService {
         this.userServiceClient = userServiceClient;
     }
 
-    public User findPartner(String userId) {
+    public UserDTO findPartner(String userId) {
         // fetch user profile from user-service
-        User user = userServiceClient.getUser(userId);
+        UserDTO user = userServiceClient.getUser(userId);
         if (user == null) {
             return null;
         }
         String userProfile = user.name();
         // fetch candidate users (simple: all users except current)
-        List<User> allUsers = userServiceClient.getAllUsers();
+        List<UserDTO> allUsers = userServiceClient.getAllUsers();
         List<Candidate> candidates = allUsers.stream()
                 .filter(u -> !u.id().equals(userId))
                 .map(u -> new Candidate(u.id(), u.name()))

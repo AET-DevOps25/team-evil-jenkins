@@ -13,8 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import model.UserDTO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -31,12 +33,12 @@ public class UserController {
     @Operation(summary = "Get a user by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the user", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class)) }),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)) }),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content) })
     @GetMapping("/{id}")
-    public ResponseEntity<UserEntity> getUserById(
+    public ResponseEntity<User> getUserById(
             @Parameter(description = "ID of user to be searched") @PathVariable("id") String id) {
-                UserEntity user = userService.getUserById(id);
+                User user = userService.getUserById(id);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -51,7 +53,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid user supplied",
                     content = @Content) })
     @PostMapping
-    public ResponseEntity<String> addUser(@RequestBody UserEntity user) {
+    public ResponseEntity<String> addUser(@RequestBody User user) {
         userService.addUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully");
     }
@@ -59,9 +61,9 @@ public class UserController {
     @Operation(summary = "Get all users")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = UserEntity.class))))
+                    array = @ArraySchema(schema = @Schema(implementation = User.class))))
     @GetMapping
-    public ResponseEntity<List<UserEntity>> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
     @Operation(summary = "Delete a user by their ID")
@@ -77,4 +79,17 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
+
+    @GetMapping("/{id}/nearby")
+    public ResponseEntity<List<UserDTO>> getNearbyUsers( //TODO: Use UserMapper ???
+            @PathVariable("id") String id,
+            @RequestParam double radius) {
+        List<User> users = userService.findNearbyUsers(id, radius);
+        List<UserDTO> dtos = users.stream()
+        .map(user -> new UserDTO(user.getId(), user.getName()))
+        .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    //TODO: Login endpoint
 }

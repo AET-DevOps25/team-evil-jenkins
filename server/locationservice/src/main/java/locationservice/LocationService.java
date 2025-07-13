@@ -1,6 +1,11 @@
 package locationservice;
 
 import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+import model.UserDTO;
 
 @Service
 public class LocationService {
@@ -10,29 +15,39 @@ public class LocationService {
         this.repository = repository;
     }
 
-    public LocationEntity updateLocation(String id, String name, double latitude, double longitude) {
-        LocationEntity entity = new LocationEntity(id, name, latitude, longitude);
-        return repository.save(entity);
+    public Location updateLocation(String userId, double latitude, double longitude) {
+        Location loc = new Location(userId, latitude, longitude );
+        repository.save(loc);
+        return loc;
     }
 
-    public java.util.Optional<LocationEntity> getLocation(String id) {
-        return repository.findById(id);
+    public List<String> searchPartnerByArea(String userId, double radiusKm) {
+        Optional<Location> currentUserLocation = repository.findById(userId);
+        if (currentUserLocation.isEmpty()) {
+            throw new IllegalArgumentException("User does not exist!");
+            //return List.of();
+        }
+        Location loc = currentUserLocation.get();
+
+        return repository.findNearbyUserIds(userId, loc.getLatitude(), loc.getLongitude(), radiusKm);
     }
 
-    public java.util.List<LocationEntity> getAll() {
+    public Location getLocation(String userId) {
+        return repository.findById(userId).orElse(null);
+    }
+
+    public java.util.List<Location> getAll() {
         return repository.findAll();
     }
 
-    public boolean delete(String id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
+    public boolean delete(String userId) {
+        if( repository.existsById(userId))
+        {
+            repository.deleteById(userId);
             return true;
+
         }
         return false;
-    }
-
-    public java.util.List<LocationEntity> searchWithinRadius(double latitude, double longitude, double radiusKm) {
-        return repository.findWithinRadius(latitude, longitude, radiusKm);
     }
 }
 
