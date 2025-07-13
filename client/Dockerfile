@@ -7,5 +7,5 @@ COPY dist/ ./dist
 # tiny static server (≈900 kB)
 RUN npm install -g serve@14
 
-EXPOSE 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+EXPOSE 80
+CMD ["serve", "-s", "dist", "-l", "80"]

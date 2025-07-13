@@ -12,6 +12,12 @@ load_dotenv()
 app = FastAPI(title="GenAI Service")
 app.include_router(matching_router)
 
+
+@app.get("/health")
+async def health():
+    """Simple health check endpoint for Kubernetes probes."""
+    return {"status": "ok"}
+
 # Local dev convenience
 if __name__ == "__main__":
     import uvicorn

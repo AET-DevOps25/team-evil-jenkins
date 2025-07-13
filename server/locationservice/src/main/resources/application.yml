@@ -6,6 +6,8 @@ spring:
   datasource:
     url: jdbc:postgresql://postgres-db:5432/location_service_db
     username: location_service_admin
+    url: jdbc:postgresql://localhost:5432/location_service_db
+    username: admin
     password: your_secure_password
   jpa:
     properties:
