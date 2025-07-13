@@ -2,7 +2,7 @@ package userservice;
 
 import userservice.UserController;
 import userservice.UserService;
-import model.User;
+import model.UserDTO;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserById() throws Exception {
-        UserEntity user = new UserEntity("1", "Alice");
+        User user = new User("1", "Alice");
         when(userService.getUserById("1")).thenReturn(user);
 
         mockMvc.perform(get("/user/1"))
@@ -54,7 +54,7 @@ public class UserControllerTest {
 
     @Test
     public void testAddUser() throws Exception {
-        User user = new User("1", "Alice");
+        UserDTO user = new UserDTO("1", "Alice");
 
         mockMvc.perform(post("/user")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -65,7 +65,7 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsers() throws Exception {
-        List<UserEntity> users = Arrays.asList(new UserEntity("1", "Alice"), new UserEntity("2", "Bob"));
+        List<User> users = Arrays.asList(new User("1", "Alice"), new User("2", "Bob"));
         when(userService.getAllUsers()).thenReturn(users);
 
         mockMvc.perform(get("/user"))

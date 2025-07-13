@@ -1,11 +1,11 @@
 package userservice;
 
-import model.User;
+import model.UserDTO;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface UserRepository extends JpaRepository<UserEntity, String> {
+public interface UserRepository extends JpaRepository<User, String> {
 }

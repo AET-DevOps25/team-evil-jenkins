@@ -4,6 +4,6 @@ public interface IPartnerMatcher {
         // define as needed
 
         // TODO: Implement partner matching logic
-    User findPartner(User user, Sport sport);
+    UserDTO findPartner(UserDTO user, SportDTO sport);
 
 }

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import model.User;
+import model.UserDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,10 +28,10 @@ public class MatchingController {
     @Operation(summary = "Find best partner for given user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found partner",
-                    content = @Content(schema = @Schema(implementation = User.class)))
+                    content = @Content(schema = @Schema(implementation = UserDTO.class)))
     })
     @GetMapping("/partner/{userId}")
-    public ResponseEntity<User> findPartner(@Parameter(description = "ID of user requesting partner") @PathVariable String userId) {
+    public ResponseEntity<UserDTO> findPartner(@Parameter(description = "ID of user requesting partner") @PathVariable String userId) {
         return ResponseEntity.ok(matchingService.findPartner(userId));
     }
 }

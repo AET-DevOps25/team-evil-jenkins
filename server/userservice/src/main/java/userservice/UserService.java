@@ -1,29 +1,40 @@
 package userservice;
 
 import org.springframework.stereotype.Service;
+
+import model.LocationDTO;
+
 import java.util.List;
 import java.util.Optional; // Import Optional
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final LocationServiceClient locationServiceClient;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserService(UserRepository repo, LocationServiceClient client) {
+        this.userRepository = repo;
+        this.locationServiceClient = client;
     }
 
-    public UserEntity getUserById(String id) {
+    public User getUserById(String id) {
         // findById now returns an Optional. Use orElse(null) or throw an exception.
-        Optional<UserEntity> userOptional = userRepository.findById(id);
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) {
+            return null;
+        }
+
+        User user = userOptional.get();
+        LocationDTO location = locationServiceClient.getLocationByUserId(id);
         return userOptional.orElse(null);
     }
 
-    public void addUser(UserEntity user) {
+    public void addUser(User user) {
         // The save method works for both creating and updating entities
         userRepository.save(user);
     }
 
-    public List<UserEntity> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -34,5 +45,12 @@ public class UserService {
             return true; // Return true on successful deletion
         }
         return false; // Return false if the user was not found
+    }
+
+    public List<User> findNearbyUsers(String userId, double radius) {
+        // Business logic can live here, before or after the call
+        List<String> userIds = locationServiceClient.searchPartnerByArea(userId, radius);
+        List<User> users = userRepository.findAllById(userIds);
+        return users;
     }
 }
