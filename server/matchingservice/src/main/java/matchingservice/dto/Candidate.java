@@ -1,4 +1,6 @@
 package matchingservice.dto;
 
-public record Candidate(String id, String profile, String location) {
+import java.util.List;
+
+public record Candidate(String id, String name, List<String> sportInterests) {
 }

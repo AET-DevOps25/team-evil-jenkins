@@ -3,73 +3,76 @@ package matchingservice;
 import org.springframework.stereotype.Service;
 
 import model.UserDTO;
+import model.MatcherDTO;
+import matchingservice.dto.RankedMatchDTO;
 import matchingservice.client.GenAiClient;
 import matchingservice.client.UserServiceClient;
 import matchingservice.entity.Match;
 import matchingservice.repository.MatchRepository;
 import matchingservice.dto.Candidate;
-import matchingservice.client.LocationServiceClient;
+
 import java.util.List;
+import java.util.Collections;
 
 @Service
 public class MatchingService {
 
     private final GenAiClient genAiClient;
-    private final LocationServiceClient locationServiceClient;
+    
     private final UserServiceClient userServiceClient;
     private final MatchRepository matchRepository;
 
-    public MatchingService(GenAiClient genAiClient, UserServiceClient userServiceClient, MatchRepository matchRepository, LocationServiceClient locationServiceClient) {
+    public MatchingService(GenAiClient genAiClient, UserServiceClient userServiceClient, MatchRepository matchRepository) {
         this.genAiClient = genAiClient;
         this.userServiceClient = userServiceClient;
         this.matchRepository = matchRepository;
-        this.locationServiceClient = locationServiceClient;
+        
     }
 
-    public UserDTO findPartner(String userId) {
-        // first check if we already have a recent match
-        List<Match> existing = matchRepository.findTop1ByUserIdOrderByCreatedAtDesc(userId);
-        if (!existing.isEmpty()) {
-            return userServiceClient.getUser(existing.get(0).getMatchedUserId());
-        }
+    public List<UserDTO> findPartners(String userId) {
+        
         // fetch user profile from user-service
         UserDTO user = userServiceClient.getUser(userId);
         if (user == null) {
             return null;
         }
         String userProfile = user.name();
-        // fetch candidate users (simple: all users except current)
-        List<UserDTO> allUsers = userServiceClient.getAllUsers();
-        List<Candidate> candidates = allUsers.stream()
-            .filter(u -> !u.id().equals(userId))
-            .map(u -> {
-                var loc = locationServiceClient.getLocation(u.id());
-                String locStr = loc != null ? loc.latitude()+","+loc.longitude() : "unknown";
-                return new Candidate(u.id(), u.name(), locStr);
-            })
-            .toList();
-        List<String> ranked = genAiClient.getRankedIds(userProfile, candidates);
-        if (!ranked.isEmpty()) {
-            // Persist matches (store up to first 5)
-            int limit = Math.min(5, ranked.size());
-            for (int i = 0; i < limit; i++) {
-                String candidateId = ranked.get(i);
-                double score = 1.0 / (i + 1); // simple descending score
-                Match m = new Match(userId, candidateId, score, "Ranked by GenAI", "");
-                matchRepository.save(m);
-            }
-            String bestId = ranked.get(0);
-            return userServiceClient.getUser(bestId);
+        // fetch candidate users (nearby)
+        List<UserDTO> allUsers = userServiceClient.getNearbyUsers(userId, 50.0); // 50km radius
+        // Ensure active user is included in candidates
+        boolean hasActiveUser = allUsers.stream().anyMatch(u -> u.id().equals(userId));
+        if (!hasActiveUser) {
+            allUsers = new java.util.ArrayList<>(allUsers);
+            allUsers.add(user);
         }
-        return null;
+        List<Candidate> candidates = allUsers.stream()
+            .map(u -> new Candidate(u.id(), u.name(), u.sportInterests()))
+            .toList();
+        List<RankedMatchDTO> ranked = genAiClient.getRankedMatches(userProfile, candidates);
+        if (ranked == null || ranked.isEmpty()) {
+            System.err.println("WARNING: GenAI returned null or empty ranked match list. Returning no matches.");
+            return Collections.emptyList();
+        }
+        // Overwrite: delete previous matches for this user
+        matchRepository.deleteByUserId(userId);
+        // Persist top-N matches
+        ranked.forEach(dto -> {
+            Match match = new Match(userId, dto.id(), dto.score(), dto.explanation(), String.join(",", dto.commonPreferences()));
+            matchRepository.save(match);
+        });
+        // Return all matched users in order (just UserDTOs for compatibility)
+        return ranked.stream()
+                .map(dto -> userServiceClient.getUser(dto.id()))
+                .filter(java.util.Objects::nonNull)
+                .toList();
     }
 
     /**
      * Retrieve previously stored matches for a user, ordered by best score.
      */
-    public List<UserDTO> getMatches(String userId) {
+    public List<MatcherDTO> getMatches(String userId) {
         return matchRepository.findByUserIdOrderByScoreDesc(userId).stream()
-                .map(m -> userServiceClient.getUser(m.getMatchedUserId()))
+                .map(matchingservice.mapper.MatchMapper::toDto)
                 .toList();
     }
 }
