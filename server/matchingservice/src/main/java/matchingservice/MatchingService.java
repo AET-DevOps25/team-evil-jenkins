@@ -27,6 +27,14 @@ public class MatchingService {
     }
 
     public UserDTO findPartner(String userId) {
+<<<<<<< HEAD
+=======
+        // first check if we already have a recent match
+        List<Match> existing = matchRepository.findTop1ByUserIdOrderByCreatedAtDesc(userId);
+        if (!existing.isEmpty()) {
+            return userServiceClient.getUser(existing.get(0).getMatchedUserId());
+        }
+>>>>>>> 63e844aa1aada8604959823af80a836a8018615f
         // fetch user profile from user-service
         UserDTO user = userServiceClient.getUser(userId);
         if (user == null) {
@@ -62,7 +70,7 @@ public class MatchingService {
     /**
      * Retrieve previously stored matches for a user, ordered by best score.
      */
-    public List<User> getMatches(String userId) {
+    public List<UserDTO> getMatches(String userId) {
         return matchRepository.findByUserIdOrderByScoreDesc(userId).stream()
                 .map(m -> userServiceClient.getUser(m.getMatchedUserId()))
                 .toList();

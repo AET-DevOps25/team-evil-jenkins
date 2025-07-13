@@ -9,12 +9,14 @@ public class UserMapper implements DTOEntityMapper<User, UserDTO>{
 
     @Override
     public UserDTO toDTO(User entity) {
-        return new UserDTO(entity.getId(), entity.getName());
+        return new UserDTO(entity.getId(), entity.getName(), entity.getSportInterests());
     }
 
     @Override
     public User toEntity(UserDTO dto) {
-        return new User(dto.id(), dto.name());
+        User user = new User(dto.id(), dto.name());
+        user.setSportInterests(dto.sportInterests());
+        return user;
     }
     
 }

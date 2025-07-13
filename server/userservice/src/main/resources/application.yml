@@ -36,4 +36,4 @@ my-service:
 
 location:
   service:
-    url: http://locationservice:8081
+    url: http://location-service:8080
