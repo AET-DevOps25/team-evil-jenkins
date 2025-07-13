@@ -12,7 +12,7 @@ import jakarta.persistence.ElementCollection;
 
 @Entity
 @Table(name = "users")
-public class UserEntity {
+public class User {
     @Id
     @Column(name = "id")
     private String id;
@@ -20,9 +20,6 @@ public class UserEntity {
     private String name;
     @Column(name = "email", unique = true)
     private String email;
-
-    @Column(name = "location_id")
-    private String locationId;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_group_ids", joinColumns = @JoinColumn(name = "user_id"))
@@ -34,10 +31,10 @@ public class UserEntity {
     @Column(name = "sport_id")
     public List<String> sportInterestIds;
 
-    public UserEntity() {
+    public User() {
     }
 
-    public UserEntity(String id, String name) {
+    public User(String id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -57,14 +54,6 @@ public class UserEntity {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getLocationId() {
-        return locationId;
-    }
-
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
     }
 
     public List<String> getGroupIds() {

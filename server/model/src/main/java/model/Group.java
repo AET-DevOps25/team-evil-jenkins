@@ -6,17 +6,17 @@ import java.time.LocalDateTime;
 public class Group {
     private String id;
     private String name;
-    private User admin;
-    private List<User> participants;
+    private UserDTO admin;
+    private List<UserDTO> participants;
     private List<Message> messages;
     private LocalDateTime eventDate;
-    private Sport sport;
+    private SportDTO sport;
 
     public Group() {
     }
 
-    public Group(String id, String name, User admin, List<User> participants, List<Message> messages,
-            LocalDateTime eventDate, Sport sport) {
+    public Group(String id, String name, UserDTO admin, List<UserDTO> participants, List<Message> messages,
+            LocalDateTime eventDate, SportDTO sport) {
         this.id = id;
         this.name = name;
         this.admin = admin;
@@ -43,19 +43,19 @@ public class Group {
         this.name = name;
     }
 
-    public User getAdmin() {
+    public UserDTO getAdmin() {
         return admin;
     }
 
-    public void setAdmin(User admin) {
+    public void setAdmin(UserDTO admin) {
         this.admin = admin;
     }
 
-    public List<User> getParticipants() {
+    public List<UserDTO> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<User> participants) {
+    public void setParticipants(List<UserDTO> participants) {
         this.participants = participants;
     }
 
@@ -75,19 +75,19 @@ public class Group {
         this.eventDate = eventDate;
     }
 
-    public Sport getSport() {
+    public SportDTO getSport() {
         return sport;
     }
 
-    public void setSport(Sport sport) {
+    public void setSport(SportDTO sport) {
         this.sport = sport;
     }
 
-    public void addParticipant(User participant) {
+    public void addParticipant(UserDTO participant) {
         participants.add(participant);
     }
 
-    public void removeParticipant(User participant) {
+    public void removeParticipant(UserDTO participant) {
         participants.remove(participant);
     }
 

@@ -1,6 +1,7 @@
 server:
   port: 8080
 
+# All Spring-related properties are nested under a single 'spring' key
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/location_service_db
@@ -17,6 +18,7 @@ spring:
   profiles:
     active: development
 
+# All management properties are nested under a single 'management' key
 management:
   endpoints:
     web:
@@ -29,5 +31,12 @@ management:
 my-service:
   message: Hello from Default Profile!
 
-# Removed duplicate 'spring:' block here. Only one 'spring:' block in the first document.
+---
+# This section for profile-specific overrides remains the same
+spring:
+  config:
+    activate:
+      on-profile: "development,production"
 
+my-service:
+  message: Hello from a non-default profile!

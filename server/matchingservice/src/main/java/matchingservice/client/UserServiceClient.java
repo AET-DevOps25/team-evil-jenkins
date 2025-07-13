@@ -3,7 +3,7 @@ package matchingservice.client;
 import java.util.Collections;
 import java.util.List;
 
-import model.User;
+import model.UserDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -18,13 +18,13 @@ public class UserServiceClient {
         this.webClient = builder.baseUrl(baseUrl).build();
     }
 
-    public User getUser(String userId) {
+    public UserDTO getUser(String userId) {
         try {
             return webClient.get()
                     .uri("/user/{id}", userId)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToMono(User.class)
+                    .bodyToMono(UserDTO.class)
                     .block();
         } catch (Exception ex) {
             System.err.println("Error fetching user: " + ex.getMessage());
@@ -32,13 +32,13 @@ public class UserServiceClient {
         }
     }
 
-    public List<User> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         try {
             return webClient.get()
                     .uri("/user")
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToFlux(User.class)
+                    .bodyToFlux(UserDTO.class)
                     .collectList()
                     .block();
         } catch (Exception ex) {
