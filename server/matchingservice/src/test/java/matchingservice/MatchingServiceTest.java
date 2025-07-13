@@ -1,14 +1,16 @@
 package matchingservice;
 
 import matchingservice.client.GenAiClient;
+
 import matchingservice.client.UserServiceClient;
-import matchingservice.dto.Candidate;
+import matchingservice.repository.MatchRepository;
 import model.UserDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 
 import java.util.List;
 
@@ -24,22 +26,35 @@ class MatchingServiceTest {
     private GenAiClient genAiClient;
     @Mock
     private UserServiceClient userServiceClient;
+    
+    @Mock
+    private MatchRepository matchRepository;
 
     @InjectMocks
     private MatchingService matchingService;
 
+
+
     @Test
     void returnsTopRankedUser() {
-        UserDTO requester = new UserDTO("u0", "Alice");
-        UserDTO bob = new UserDTO("u1", "Bob");
-        UserDTO carol = new UserDTO("u2", "Carol");
+        UserDTO requester = new UserDTO("u0", "Alice", List.of("Hiking", "Climbing"));
+        UserDTO bob = new UserDTO("u1", "Bob", List.of("Swimming"));
+        UserDTO carol = new UserDTO("u2", "Carol", List.of("Hiking"));
 
         when(userServiceClient.getUser("u0")).thenReturn(requester);
-        when(userServiceClient.getAllUsers()).thenReturn(List.of(requester, bob, carol));
-        when(genAiClient.getRankedIds(eq("Alice"), anyList())).thenReturn(List.of("u2", "u1"));
-        when(userServiceClient.getUser("u2")).thenReturn(carol);
+        when(userServiceClient.getNearbyUsers(eq("u0"), eq(50.0))).thenReturn(List.of(requester, bob, carol));
 
-        UserDTO partner = matchingService.findPartner("u0");
-        assertEquals("u2", partner.id());
+        when(genAiClient.getRankedIds(eq("Alice"), anyList())).thenReturn(List.of("u2", "u1"));
+
+        when(userServiceClient.getUser("u2")).thenReturn(carol);
+        when(userServiceClient.getUser("u1")).thenReturn(bob);
+
+        // No DB matches initially
+        // when(matchRepository.findTop1ByUserIdOrderByCreatedAtDesc("u0")).thenReturn(Collections.emptyList());
+
+        List<UserDTO> matches = matchingService.findPartners("u0");
+        assertEquals(2, matches.size());
+        assertEquals("u2", matches.get(0).id());
+        assertEquals("u1", matches.get(1).id());
     }
 }

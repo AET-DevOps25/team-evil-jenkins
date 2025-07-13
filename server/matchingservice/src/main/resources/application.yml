@@ -14,8 +14,22 @@ my-service:
   message: Hello from Default Profile!
 
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/matchingservice_db
+    username: admin
+    password: your_secure_password
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
   profiles:
     active: development
+
+
 ---
 
 spring:
@@ -34,3 +48,6 @@ spring:
 
 my-service:
   message: Hello from Production!
+
+
+

@@ -24,9 +24,6 @@ public class UserService {
         if (userOptional.isEmpty()) {
             return null;
         }
-
-        User user = userOptional.get();
-        LocationDTO location = locationServiceClient.getLocationByUserId(id);
         return userOptional.orElse(null);
     }
 

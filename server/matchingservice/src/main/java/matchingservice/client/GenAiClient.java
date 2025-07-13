@@ -6,6 +6,7 @@ import java.util.List;
 import matchingservice.dto.Candidate;
 import matchingservice.dto.MatchRequest;
 import matchingservice.dto.MatchResponse;
+import matchingservice.dto.RankedMatchDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class GenAiClient {
+
+    /**
+     * Temporary compatibility shim for existing unit tests.
+     */
+    @Deprecated
+    public List<String> getRankedIds(String userProfile, List<Candidate> candidates) {
+        return getRankedMatches(userProfile, candidates).stream().map(RankedMatchDTO::id).toList();
+    }
 
     private final WebClient webClient;
 
@@ -28,7 +37,7 @@ public class GenAiClient {
      * @param candidates  List of candidate DTOs (id + profile)
      * @return ordered list of candidate IDs (best match first); empty list on error
      */
-    public List<String> getRankedIds(String userProfile, List<Candidate> candidates) {
+    public List<RankedMatchDTO> getRankedMatches(String userProfile, List<Candidate> candidates) {
         MatchRequest request = new MatchRequest(userProfile, candidates);
         try {
             MatchResponse response = webClient.post()
@@ -39,7 +48,7 @@ public class GenAiClient {
                     .bodyToMono(MatchResponse.class)
                     .block();
 
-            return response != null ? response.rankedIds() : Collections.emptyList();
+            return response != null ? response.matches() : Collections.emptyList();
         } catch (Exception ex) {
             // In production use a proper logger
             System.err.println("Error calling GenAI service: " + ex.getMessage());

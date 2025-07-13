@@ -36,9 +36,9 @@ public class User {
     private List<String> groupIds;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "user_sport_interest_ids", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "sport_id")
-    public List<String> sportInterestIds;
+    @CollectionTable(name = "user_sport_interests", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "sport_interests")
+    public List<String> sportInterests;
 
     public User() {
     }
@@ -105,12 +105,12 @@ public class User {
         this.groupIds = groupIds;
     }
 
-    public List<String> getSportInterestIds() {
-        return sportInterestIds;
+    public List<String> getSportInterests() {
+        return sportInterests;
     }
 
-    public void setSportInterestIds(List<String> sportInterestIds) {
-        this.sportInterestIds = sportInterestIds;
+    public void setSportInterests(List<String> sportInterests) {
+        this.sportInterests = sportInterests;
     }
 
     public void sendMessage(String groupId, String message) {
