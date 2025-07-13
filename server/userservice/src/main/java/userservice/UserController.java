@@ -25,9 +25,12 @@ public class UserController {
 
     private final UserService userService;
 
+    private final UserMapper userMapper;
+
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserMapper mapper) {
         this.userService = userService;
+        this.userMapper = mapper;
     }
 
     @Operation(summary = "Get a user by their ID")
@@ -36,11 +39,11 @@ public class UserController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)) }),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content) })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(
+    public ResponseEntity<UserDTO> getUserById(
             @Parameter(description = "ID of user to be searched") @PathVariable("id") String id) {
                 User user = userService.getUserById(id);
         if (user != null) {
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(userMapper.toDTO(user));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -63,9 +66,14 @@ public class UserController {
             content = @Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = User.class))))
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        List<UserDTO> dtos = users.stream()
+                                          .map(userMapper::toDTO)
+                                          .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
+
     @Operation(summary = "Delete a user by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User deleted successfully", content = @Content(mediaType = "text/plain")),
