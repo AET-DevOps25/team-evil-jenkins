@@ -1,4 +1,4 @@
 package matchingservice.dto;
 
-public record Candidate(String id, String profile) {
+public record Candidate(String id, String profile, String location) {
 }

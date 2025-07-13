@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import model.User;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,5 +34,15 @@ public class MatchingController {
     @GetMapping("/partner/{userId}")
     public ResponseEntity<User> findPartner(@Parameter(description = "ID of user requesting partner") @PathVariable String userId) {
         return ResponseEntity.ok(matchingService.findPartner(userId));
+    }
+
+    @Operation(summary = "Get previous matches for user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = User.class)))
+    })
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<List<User>> getMatches(@Parameter(description = "ID of user") @PathVariable String userId) {
+        return ResponseEntity.ok(matchingService.getMatches(userId));
     }
 }

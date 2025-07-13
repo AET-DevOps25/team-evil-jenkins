@@ -15,6 +15,7 @@ engine = MatchingEngine()
 class Candidate(BaseModel):
     id: str = Field(..., description="Unique ID of the candidate user")
     profile: str = Field(..., description="Natural-language profile description")
+    location: str = Field(..., description="User location as 'lat,long' or 'unknown'")
 
 
 class MatchRequest(BaseModel):

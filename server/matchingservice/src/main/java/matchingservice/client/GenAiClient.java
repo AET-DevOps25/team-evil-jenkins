@@ -37,7 +37,7 @@ public class GenAiClient {
                     .bodyValue(request)
                     .retrieve()
                     .bodyToMono(MatchResponse.class)
-                    .block();
+                    .block(); // location is now included in Candidate
 
             return response != null ? response.rankedIds() : Collections.emptyList();
         } catch (Exception ex) {
