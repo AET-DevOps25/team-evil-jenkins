@@ -25,17 +25,13 @@ public class Location {
     @Column(name = "longitude")
     private double longitude;
 
-    @Column(name = "timestamp")
-    private Instant timestamp;
-    
     public Location() {
     }
     
-    public Location(String userId, double latitude, double longitude, Instant timestamp) {
+    public Location(String userId, double latitude, double longitude) {
         this.userId = userId;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.timestamp = timestamp;
     }
     
     // Getters and setters
@@ -63,11 +59,4 @@ public class Location {
         this.longitude = longitude;
     }
     
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-    
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
 }

@@ -16,7 +16,7 @@ public class LocationService {
     }
 
     public Location updateLocation(String userId, double latitude, double longitude) {
-        Location loc = new Location(userId, latitude, longitude, Instant.now());
+        Location loc = new Location(userId, latitude, longitude );
         repository.save(loc);
         return loc;
     }

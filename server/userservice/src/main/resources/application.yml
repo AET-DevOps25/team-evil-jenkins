@@ -14,11 +14,6 @@ my-service:
   message: Hello from Default Profile!
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/user_service_db
-    username: user_service_admin
-    password: your_secure_password
-
   jpa:
     properties:
       hibernate:
