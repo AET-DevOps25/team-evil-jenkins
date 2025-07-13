@@ -1,5 +1,7 @@
 package matchingservice;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +40,10 @@ public class MatchingController {
     @Operation(summary = "Get previous matches for user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(schema = @Schema(implementation = User.class)))
+                    content = @Content(schema = @Schema(implementation = UserDTO.class)))
     })
     @GetMapping("/history/{userId}")
-    public ResponseEntity<List<User>> getMatches(@Parameter(description = "ID of user") @PathVariable String userId) {
+    public ResponseEntity<List<UserDTO>> getMatches(@Parameter(description = "ID of user") @PathVariable String userId) {
         return ResponseEntity.ok(matchingService.getMatches(userId));
     }
 }

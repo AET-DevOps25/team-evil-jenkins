@@ -26,7 +26,7 @@ public class MatchingService {
         this.locationServiceClient = locationServiceClient;
     }
 
-    public User findPartner(String userId) {
+    public UserDTO findPartner(String userId) {
         // first check if we already have a recent match
         List<Match> existing = matchRepository.findTop1ByUserIdOrderByCreatedAtDesc(userId);
         if (!existing.isEmpty()) {
@@ -67,7 +67,7 @@ public class MatchingService {
     /**
      * Retrieve previously stored matches for a user, ordered by best score.
      */
-    public List<User> getMatches(String userId) {
+    public List<UserDTO> getMatches(String userId) {
         return matchRepository.findByUserIdOrderByScoreDesc(userId).stream()
                 .map(m -> userServiceClient.getUser(m.getMatchedUserId()))
                 .toList();
