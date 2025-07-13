@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import Header from '../components/Header';
 import '../styles/ProfilePage.css';
 
@@ -19,7 +20,21 @@ const allSports = ['Hiking', 'Running', 'Cycling', 'Swimming', 'Tennis', 'Basket
 const skillLevels = ['Beginner', 'Intermediate', 'Advanced'];
 
 function ProfilePage() {
+    const { user } = useAuth0();
     const [form, setForm] = useState(initialState);
+
+    // populate with Auth0 data when available
+    useEffect(() => {
+        if (user) {
+            setForm(prev => ({
+                ...prev,
+                firstName: user.given_name || user.name?.split(' ')[0] || '',
+                lastName: user.family_name || user.name?.split(' ').slice(1).join(' ') || '',
+                email: user.email || '',
+                avatar: user.picture || '',
+            }));
+        }
+    }, [user]);
 
     const handleInput = (e) => {
         const { name, value } = e.target;
@@ -64,7 +79,7 @@ function ProfilePage() {
                 {/* Sidebar */}
                 <aside className="profile-sidebar card">
                     <div className="avatar-wrapper">
-                        <img src="/images/avatar-profile.png" alt="User avatar" className="avatar-lg" />
+                        <img src={form.avatar || '/images/avatar-profile.png'} alt="User avatar" className="avatar-lg" />
                         <span className="status-badge" />
                     </div>
                     <h3 className="user-name">{`${form.firstName} ${form.lastName}`}</h3>
@@ -129,6 +144,17 @@ function ProfilePage() {
                         </div>
 
                         <div className="form-group">
+                            <label htmlFor="email">Email (read-only)</label>
+                            <input
+                                id="email"
+                                name="email"
+                                value={form.email}
+                                readOnly
+                                disabled
+                            />
+                        </div>
+
+                        <div className="form-group">
                             <label htmlFor="location">Location</label>
                             <input
                                 id="location"
@@ -187,43 +213,43 @@ function ProfilePage() {
                             </div>
                         </fieldset>
 
-                    <fieldset className="form-group">
-                        <legend>Availability</legend>
-                        <div className="availability-list">
-                            {daysOfWeek.map((day) => (
-                                <div key={day} className="day-row">
-                                    <label className={`checkbox-label day-select ${form.availability[day].length > 0 ? 'selected' : ''}`}>
-                                        <input
-                                            type="checkbox"
-                                            checked={form.availability[day].length > 0}
-                                            onChange={() => toggleDay(day)}
-                                        />
-                                        <span>{day}</span>
-                                    </label>
-                                    {form.availability[day].length > 0 && (
-                                        <div className="time-options">
-                                            {timeSlots.map((slot) => (
-                                                <label
-                                                    key={slot}
-                                                    className={`checkbox-label ${form.availability[day].includes(slot) ? 'selected' : ''}`}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={form.availability[day].includes(slot)}
-                                                        onChange={() => toggleTime(day, slot)}
-                                                    />
-                                                    <span className="icon-schedule" role="img" aria-label="schedule">🗓️</span>
-                                                    <span>{slot}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </fieldset>
+                        <fieldset className="form-group">
+                            <legend>Availability</legend>
+                            <div className="availability-list">
+                                {daysOfWeek.map((day) => (
+                                    <div key={day} className="day-row">
+                                        <label className={`checkbox-label day-select ${form.availability[day].length > 0 ? 'selected' : ''}`}>
+                                            <input
+                                                type="checkbox"
+                                                checked={form.availability[day].length > 0}
+                                                onChange={() => toggleDay(day)}
+                                            />
+                                            <span>{day}</span>
+                                        </label>
+                                        {form.availability[day].length > 0 && (
+                                            <div className="time-options">
+                                                {timeSlots.map((slot) => (
+                                                    <label
+                                                        key={slot}
+                                                        className={`checkbox-label ${form.availability[day].includes(slot) ? 'selected' : ''}`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={form.availability[day].includes(slot)}
+                                                            onChange={() => toggleTime(day, slot)}
+                                                        />
+                                                        <span className="icon-schedule" role="img" aria-label="schedule">🗓️</span>
+                                                        <span>{slot}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </fieldset>
 
-                                            <div className="form-actions">
+                        <div className="form-actions">
                             <button type="button" className="btn cancel" onClick={() => setForm(initialState)}>
                                 Cancel
                             </button>

@@ -36,7 +36,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserEntity> getUserById(
             @Parameter(description = "ID of user to be searched") @PathVariable("id") String id) {
-                UserEntity user = userService.getUserById(id);
+        UserEntity user = userService.getUserById(id);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -46,30 +46,28 @@ public class UserController {
 
     @Operation(summary = "Add a new user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User created successfully",
-                    content = @Content(mediaType = "text/plain")),
-            @ApiResponse(responseCode = "400", description = "Invalid user supplied",
-                    content = @Content) })
-    @PostMapping
+            @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content(mediaType = "text/plain")),
+            @ApiResponse(responseCode = "400", description = "Invalid user supplied", content = @Content) })
+    @PostMapping({"", "/"})
     public ResponseEntity<String> addUser(@RequestBody UserEntity user) {
         userService.addUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully");
     }
 
     @Operation(summary = "Get all users")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users",
-            content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = UserEntity.class))))
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserEntity.class))))
     @GetMapping
     public ResponseEntity<List<UserEntity>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
+
     @Operation(summary = "Delete a user by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User deleted successfully", content = @Content(mediaType = "text/plain")),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content) })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUserById(@Parameter(description = "ID of user to be deleted") @PathVariable("id") String id) {
+    public ResponseEntity<String> deleteUserById(
+            @Parameter(description = "ID of user to be deleted") @PathVariable("id") String id) {
         boolean deleted = userService.deleteUserById(id);
         if (deleted) {
             return ResponseEntity.ok("User deleted successfully");

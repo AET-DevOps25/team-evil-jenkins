@@ -63,6 +63,14 @@ public class UserEntity {
         return locationId;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     public void setLocationId(String locationId) {
         this.locationId = locationId;
     }

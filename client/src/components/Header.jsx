@@ -1,8 +1,10 @@
 import React from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { NavLink } from 'react-router-dom';
 import '../styles/LandingPage.css';
 
-const Header = ({ isAuth = true }) => {
+const Header = () => {
+    const { isAuthenticated, user, logout, loginWithRedirect } = useAuth0();
     const authNav = [
         { path: '/home', label: 'Home' },
         { path: '/matching', label: 'Matching' },
@@ -26,7 +28,7 @@ const Header = ({ isAuth = true }) => {
                 </div>
 
                 <nav>
-                    {isAuth ? (
+                    {isAuthenticated ? (
                         <ul className="nav-links">
                             {authNav.map((item) => (
                                 <li key={item.path}>
@@ -50,17 +52,24 @@ const Header = ({ isAuth = true }) => {
                     )}
                 </nav>
 
-                {isAuth ? (
+                {isAuthenticated ? (
                     <div className="auth-links">
                         <button className="icon-btn" aria-label="Notifications">
                             <img src="/images/icon-bell.svg" alt="Bell" />
                         </button>
-                        <img src="/images/avatar-user.jpg" alt="User avatar" className="avatar-small" />
+                        {user?.picture && (
+                            <img
+                                src={user.picture}
+                                alt={user.name}
+                                className="avatar-small"
+                                style={{ width: 32, height: 32, borderRadius: '50%' }}
+                            />
+                        )}                        <button onClick={() => logout({ returnTo: window.location.origin })} className="btn btn-tertiary">Log out</button>
                     </div>
                 ) : (
                     <div className="auth-links">
-                        <Link to="/signin" className="signin">Sign In</Link>
-                        <Link to="/signup" className="btn btn-secondary">Get Started</Link>
+                        <button onClick={()=>loginWithRedirect()} className="signin">Sign In</button>
+                        <button onClick={()=>loginWithRedirect({screen_hint:'signup'})} className="btn btn-secondary">Get Started</button>
                     </div>
                 )}
             </div>
