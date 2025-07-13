@@ -1,7 +1,9 @@
 package userservice;
 
 import java.util.List;
+import java.util.Map;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -20,6 +22,13 @@ public class User {
     private String name;
     @Column(name = "email", unique = true)
     private String email;
+
+    private String bio;
+
+    private String skillLevel;
+
+    @Transient
+    private Map<String, List<String>> availability;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_group_ids", joinColumns = @JoinColumn(name = "user_id"))
@@ -58,6 +67,30 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getSkillLevel() {
+        return skillLevel;
+    }
+
+    public void setSkillLevel(String skillLevel) {
+        this.skillLevel = skillLevel;
+    }
+
+    public Map<String, List<String>> getAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(Map<String, List<String>> availability) {
+        this.availability = availability;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 
     public String getEmail() {

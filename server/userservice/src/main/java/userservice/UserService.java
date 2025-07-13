@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import model.LocationDTO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional; // Import Optional
 
 @Service
@@ -36,6 +37,28 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public boolean updateUser(String id, String firstName, String lastName, String bio, String skillLevel,
+            Map<String, List<String>> availability, List<String> sports) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null)
+            return false;
+        if (firstName != null || lastName != null) {
+            user.setName(String.format("%s %s", firstName != null ? firstName : user.getName().split(" ")[0],
+                    lastName != null ? lastName : (user.getName().contains(" ") ? user.getName().split(" ", 2)[1] : ""))
+                    .trim());
+        }
+        if (bio != null)
+            user.setBio(bio);
+        if (skillLevel != null)
+            user.setSkillLevel(skillLevel);
+        if (availability != null)
+            user.setAvailability(availability);
+        if (sports != null)
+            user.setSportInterestIds(sports);
+        userRepository.save(user);
+        return true;
     }
 
     public boolean deleteUserById(String id) {

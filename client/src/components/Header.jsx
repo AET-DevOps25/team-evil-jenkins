@@ -7,7 +7,7 @@ const Header = () => {
     const { isAuthenticated, user, logout, loginWithRedirect } = useAuth0();
     const authNav = [
         { path: '/home', label: 'Home' },
-        { path: '/matching', label: 'Matching' },
+        { path: '/matches', label: 'Matching' },
         { path: '/profile', label: 'Profile' },
         { path: '/messages', label: 'Messages' },
         { path: '/events', label: 'Events' }
@@ -68,8 +68,8 @@ const Header = () => {
                     </div>
                 ) : (
                     <div className="auth-links">
-                        <button onClick={()=>loginWithRedirect()} className="signin">Sign In</button>
-                        <button onClick={()=>loginWithRedirect({screen_hint:'signup'})} className="btn btn-secondary">Get Started</button>
+                        <button onClick={() => loginWithRedirect()} className="signin">Sign In</button>
+                        <button onClick={() => loginWithRedirect({ screen_hint: 'signup' })} className="btn btn-secondary">Get Started</button>
                     </div>
                 )}
             </div>

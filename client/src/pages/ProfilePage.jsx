@@ -19,9 +19,12 @@ const initialState = {
 const allSports = ['Hiking', 'Running', 'Cycling', 'Swimming', 'Tennis', 'Basketball'];
 const skillLevels = ['Beginner', 'Intermediate', 'Advanced'];
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
+
 function ProfilePage() {
-    const { user } = useAuth0();
+    const { user, getAccessTokenSilently } = useAuth0();
     const [form, setForm] = useState(initialState);
+    const [location, setLocation] = useState({ lat: null, lon: null, address: '' });
 
     // populate with Auth0 data when available
     useEffect(() => {
@@ -34,6 +37,51 @@ function ProfilePage() {
                 avatar: user.picture || '',
             }));
         }
+    }, [user]);
+
+    // fetch location from backend and reverse-geocode to a human-readable address
+    useEffect(() => {
+        if (!user) return;
+        (async () => {
+            try {
+                const token = await getAccessTokenSilently();
+                const res = await fetch(`${API}/location/${encodeURIComponent(user.sub)}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json(); // { latitude, longitude }
+                const { latitude, longitude } = data;
+                let address = '';
+                if (latitude && longitude) {
+                    try {
+                        const gRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                        if (gRes.ok) {
+                            const gJson = await gRes.json();
+                            const addrObj = gJson.address || {};
+                            const street = addrObj.road || addrObj.pedestrian || '';
+                            const houseNo = addrObj.house_number || '';
+                            const locality = addrObj.city || addrObj.town || addrObj.village || addrObj.municipality || addrObj.county || '';
+                            const state = addrObj.state || '';
+                            const parts = [];
+                            if (street) parts.push(street + (houseNo ? ` ${houseNo}` : ''));
+                            if (locality) parts.push(locality);
+                            if (state) parts.push(state);
+                            const formatted = parts.join(', ').trim();
+                            setLocation({ lat: latitude, lon: longitude, address: formatted || address, raw: address });
+                            setForm(prev => ({ ...prev, location: formatted || address }));
+                        }
+                    } catch (_) {
+                        // ignore geocode errors
+                    }
+
+                }
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error('Failed to load location', e);
+            }
+        })();
     }, [user]);
 
     const handleInput = (e) => {
@@ -66,10 +114,35 @@ function ProfilePage() {
 
 
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        // TODO: connect to backend API
-        alert('Profile saved (stub)');
+        try {
+            const token = await getAccessTokenSilently();
+            const body = {
+                firstName: form.firstName,
+                lastName: form.lastName,
+                bio: form.bio,
+                skillLevel: form.skillLevel,
+                availability: form.availability,
+                sports: form.sports,
+            };
+            const res = await fetch(`${API}/user/${user.sub}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) throw new Error(`Failed: ${res.status}`);
+            // eslint-disable-next-line no-alert
+            alert('Profile saved!');
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('Save failed', err);
+            // eslint-disable-next-line no-alert
+            alert('Save failed');
+        }
     };
 
     return (
@@ -83,7 +156,7 @@ function ProfilePage() {
                         <span className="status-badge" />
                     </div>
                     <h3 className="user-name">{`${form.firstName} ${form.lastName}`}</h3>
-                    <p className="location-text">{form.location}</p>
+                    <p className="location-text">{location.address || form.location}</p>
                     <span className="status-text active">Active</span>
 
                     <div className="sidebar-section">
@@ -98,6 +171,14 @@ function ProfilePage() {
                     </div>
 
                     <div className="sidebar-section">
+                        <h3>User Information</h3>
+                        {location.address && (
+                            <div className="location-info">
+                                <h4>Current Location</h4>
+                                <p className="address">{location.address}</p>
+                                <p className="coords">({location.lat?.toFixed(5)}, {location.lon?.toFixed(5)})</p>
+                            </div>
+                        )}
                         <h4>Skill Level</h4>
                         <p>{form.skillLevel}</p>
                     </div>
@@ -118,7 +199,10 @@ function ProfilePage() {
                 </aside>
 
                 {/* Form content */}
-                <div className="profile-content card">
+                <div className="profile-content card" style={{position:'relative'}}>
+                        <button type="button" className="refresh-btn" onClick={() => window.location.reload()} aria-label="Refresh profile">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.13-3.36L23 10"></path><path d="M20.49 15a9 9 0 01-14.13 3.36L1 14"></path></svg>
+                        </button>
                     <h2>Edit Profile</h2>
                     <p className="subtitle">Update your information to find better matches</p>
                     <form onSubmit={handleSave} className="profile-form">
@@ -155,12 +239,13 @@ function ProfilePage() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="location">Location</label>
+                            <label htmlFor="location">Location (read-only)</label>
                             <input
                                 id="location"
                                 name="location"
                                 value={form.location}
-                                onChange={handleInput}
+                                readOnly
+                                disabled
                             />
                         </div>
 
