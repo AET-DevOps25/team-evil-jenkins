@@ -56,20 +56,12 @@ public class User {
         this.id = id;
     }
 
-    public String getLocationId() {
-        return locationId;
-    }
-
     public void setEmail(String email) {
         this.email = email;
     }
 
     public String getEmail() {
         return email;
-    }
-
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
     }
 
     public List<String> getGroupIds() {
