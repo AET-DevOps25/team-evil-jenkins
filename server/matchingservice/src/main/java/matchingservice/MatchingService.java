@@ -27,14 +27,11 @@ public class MatchingService {
     }
 
     public UserDTO findPartner(String userId) {
-<<<<<<< HEAD
-=======
         // first check if we already have a recent match
         List<Match> existing = matchRepository.findTop1ByUserIdOrderByCreatedAtDesc(userId);
         if (!existing.isEmpty()) {
             return userServiceClient.getUser(existing.get(0).getMatchedUserId());
         }
->>>>>>> 63e844aa1aada8604959823af80a836a8018615f
         // fetch user profile from user-service
         UserDTO user = userServiceClient.getUser(userId);
         if (user == null) {
