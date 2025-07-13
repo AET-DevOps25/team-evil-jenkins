@@ -20,7 +20,7 @@ HEADERS = {
 ENDPOINT = config.OPENWEBUI_URL.rstrip("/") + "/api/chat/completions"
 
 
-def rank_candidates(user_profile: str, candidates: List[dict], top_k: int | None = None) -> List[str]:
+def rank_candidates(user_profile: str, candidates: List[dict], top_k: int | None = None) -> List[dict]:
     """Ask the LLM to rank `candidates` for `user_profile`.
 
     Parameters
@@ -41,15 +41,21 @@ def rank_candidates(user_profile: str, candidates: List[dict], top_k: int | None
     if top_k is None:
         top_k = config.TOP_K_MATCHES
 
+    # Instruct the model VERY CLEARLY to respond with **only** a JSON array of objects.
+    # Each object MUST contain: id (string), score (number 0-1), explanation (string), common_preferences (array of strings).
     system_prompt = (
-        "You are a matchmaking engine.  Given one user and a set of other user\n"
-        "profiles, return the IDs of the most compatible candidates ordered by\n"
-        "compatibility (best first) as a JSON array of strings, no extra text."
+        "You are a matchmaking engine.  Given one active user and a set of candidate users, "
+        "rank the candidates by compatibility and provide additional details.  **Respond ONLY with a JSON "
+        "array where each element is an object with the following keys (exact names): id (string), score (number between 0 and 1), "
+        "explanation (string), common_preferences (array of strings).  Do NOT wrap the JSON in Markdown fences, do NOT add "
+        "extra keys or commentary.  The response MUST look like this (example):\n"
+        "[ {\"id\": \"u17\", \"score\": 0.92, \"explanation\": \"Both play tennis regularly\", \"common_preferences\": [\"Tennis\"]}, "
+        "{\"id\": \"u42\", \"score\": 0.88, \"explanation\": \"Enjoy hiking\", \"common_preferences\": [\"Hiking\"]} ]"
     )
 
     user_prompt = (
         "Active user:\n" + user_profile + "\n\n" +
-        "Candidates (JSON):\n" + json.dumps(candidates, ensure_ascii=False)
+        "Candidates (JSON, each with id, name, sportInterests):\n" + json.dumps(candidates, ensure_ascii=False)
     )
 
     payload = {
@@ -66,10 +72,11 @@ def rank_candidates(user_profile: str, candidates: List[dict], top_k: int | None
 
     content = resp.json()["choices"][0]["message"]["content"].strip()
     # Expect pure JSON list.  If the model wrapped it in markdown, try to strip.
-    if content.startswith("```"):
-        content = content.split("```", 2)[1]
+    # The model has been instructed to output ONLY a JSON array.  No fences expected.
+    print("RAW LLM content:", content[:400])
     try:
-        return json.loads(content)[:top_k]
-    except json.JSONDecodeError:
-        # Fallback: return empty list to avoid crashing the service.
-        return []
+        matches = json.loads(content)
+        return matches[:top_k]
+    except json.JSONDecodeError as exc:
+        # Surface the error – downstream service should respond 500 so we notice.
+        raise ValueError(f"GenAI did not return strict JSON array: {content}") from exc

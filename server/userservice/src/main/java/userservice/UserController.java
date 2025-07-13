@@ -91,7 +91,7 @@ public class UserController {
             @RequestParam double radius) {
         List<User> users = userService.findNearbyUsers(id, radius);
         List<UserDTO> dtos = users.stream()
-                .map(user -> new UserDTO(user.getId(), user.getName()))
+                .map(userMapper::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }

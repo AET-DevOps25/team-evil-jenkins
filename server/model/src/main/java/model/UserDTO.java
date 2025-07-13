@@ -1,6 +1,8 @@
 // In your shared 'model' module
 package model;
 
-public record UserDTO(String id, String name) 
+import java.util.List;
+
+public record UserDTO(String id, String name, List<String> sportInterests) 
 {
 }

@@ -46,4 +46,19 @@ public class UserServiceClient {
             return Collections.emptyList();
         }
     }
+
+    public List<UserDTO> getNearbyUsers(String userId, double radiusKm) {
+        try {
+            return webClient.get()
+                    .uri("/user/{id}/nearby?radius={r}", userId, radiusKm)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToFlux(UserDTO.class)
+                    .collectList()
+                    .block();
+        } catch (Exception ex) {
+            System.err.println("Error fetching nearby users: " + ex.getMessage());
+            return Collections.emptyList();
+        }
+    }
 }

@@ -4,5 +4,5 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record MatchResponse(@JsonProperty("ranked_ids") List<String> rankedIds) {
+public record MatchResponse(@JsonProperty("matches") List<RankedMatchDTO> matches) {
 }

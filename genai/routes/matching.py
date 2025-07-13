@@ -1,7 +1,7 @@
 """FastAPI router exposing matchmaking endpoint for other services."""
 from __future__ import annotations
 
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -14,7 +14,8 @@ engine = MatchingEngine()
 
 class Candidate(BaseModel):
     id: str = Field(..., description="Unique ID of the candidate user")
-    profile: str = Field(..., description="Natural-language profile description")
+    name: str = Field(..., description="Name of the candidate user")
+    sportInterests: list[str] = Field(..., description="List of sports the user is interested in")
 
 
 class MatchRequest(BaseModel):
@@ -22,8 +23,14 @@ class MatchRequest(BaseModel):
     candidates: List[Candidate] = Field(..., description="List of candidate users to rank")
 
 
+class MatchItem(BaseModel):
+    id: str
+    score: float
+    explanation: str
+    common_preferences: List[str]
+
 class MatchResponse(BaseModel):
-    ranked_ids: List[str] = Field(..., description="IDs of best candidates, ordered by compatibility")
+    matches: List[MatchItem] = Field(..., description="Best candidates with details, ordered by compatibility")
 
 
 @router.post("/match", response_model=MatchResponse)
@@ -38,7 +45,7 @@ async def match(req: MatchRequest) -> MatchResponse:  # noqa: D401  (simple func
 
     try:
         ranked = engine.match(req.user_profile, candidates_data)
-        return MatchResponse(ranked_ids=ranked)
+        return MatchResponse(matches=ranked)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=f"Matching failed: {exc}") from exc
 @router.get("/health")
