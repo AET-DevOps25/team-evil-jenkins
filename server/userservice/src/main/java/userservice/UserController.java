@@ -53,7 +53,7 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content(mediaType = "text/plain")),
             @ApiResponse(responseCode = "400", description = "Invalid user supplied", content = @Content) })
-    @PostMapping
+    @PostMapping({ "", "/" })
     public ResponseEntity<String> addUser(@RequestBody User user) {
         userService.addUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully");
