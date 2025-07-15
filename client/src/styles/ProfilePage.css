@@ -293,6 +293,49 @@ fieldset {
   filter: brightness(0) invert(1);
 }
 
+.location-info {
+  margin-top: 0.5rem;
+  line-height: 1.35;
+}
+
+.location-info .address {
+  font-weight: 600;
+  color: #111827;
+}
+
+.location-info .coords {
+  font-size: 0.85rem;
+  color: #6b6b6b;
+}
+
+.refresh-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #22C55E;
+  border: none;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.refresh-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+}
+
+.refresh-btn:hover {
+  filter: brightness(1.05);
+}
+
 /* Buttons reuse existing .btn styles from LandingPage.css */
 .btn.cancel {
   background: #ffffff;

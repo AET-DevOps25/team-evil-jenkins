@@ -7,7 +7,7 @@ const Header = () => {
     const { isAuthenticated, user, logout, loginWithRedirect } = useAuth0();
     const authNav = [
         { path: '/home', label: 'Home' },
-        { path: '/matching', label: 'Matching' },
+        { path: '/matches', label: 'Matching' },
         { path: '/profile', label: 'Profile' },
         { path: '/messages', label: 'Messages' },
         { path: '/events', label: 'Events' }
@@ -55,7 +55,7 @@ const Header = () => {
                 {isAuthenticated ? (
                     <div className="auth-links">
                         <button className="icon-btn" aria-label="Notifications">
-                            <img src="/images/icon-bell.svg" alt="Bell" />
+                            {/* <img src="/images/icon-bell.svg" alt="Bell" /> */}
                         </button>
                         {user?.picture && (
                             <img
@@ -63,13 +63,14 @@ const Header = () => {
                                 alt={user.name}
                                 className="avatar-small"
                                 style={{ width: 32, height: 32, borderRadius: '50%' }}
+                                onClick={() => navigate('/profile')}
                             />
-                        )}                        <button onClick={() => logout({ returnTo: window.location.origin })} className="btn btn-tertiary">Log out</button>
+                        )}                        <button onClick={() => logout({ returnTo: window.location.origin })} className="btn btn-secondary">Log out</button>
                     </div>
                 ) : (
                     <div className="auth-links">
-                        <button onClick={()=>loginWithRedirect()} className="signin">Sign In</button>
-                        <button onClick={()=>loginWithRedirect({screen_hint:'signup'})} className="btn btn-secondary">Get Started</button>
+                        <button onClick={() => loginWithRedirect()} className="btn btn-secondary">Login/Sign Up</button>
+                        <button onClick={() => loginWithRedirect({ screen_hint: 'signup' })} className="btn btn-secondary">Get Started</button>
                     </div>
                 )}
             </div>
