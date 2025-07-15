@@ -36,6 +36,22 @@ spec:
             - name: http
               containerPort: {{ .Values.client.service.port }}
               protocol: TCP
+          env:
+            - name: VITE_AUTH0_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secrets
+                  key: VITE_AUTH0_DOMAIN
+            - name: VITE_AUTH0_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secrets
+                  key: VITE_AUTH0_CLIENT_ID
+            - name: VITE_AUTH0_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secrets
+                  key: VITE_AUTH0_AUDIENCE
           livenessProbe:
             httpGet:
               path: /

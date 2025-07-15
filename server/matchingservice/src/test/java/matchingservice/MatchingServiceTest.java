@@ -5,6 +5,7 @@ import matchingservice.client.GenAiClient;
 import matchingservice.client.UserServiceClient;
 import matchingservice.repository.MatchRepository;
 import model.UserDTO;
+import matchingservice.dto.RankedMatchDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 import java.util.List;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -44,13 +46,14 @@ class MatchingServiceTest {
         when(userServiceClient.getUser("u0")).thenReturn(requester);
         when(userServiceClient.getNearbyUsers(eq("u0"), eq(50.0))).thenReturn(List.of(requester, bob, carol));
 
-        when(genAiClient.getRankedIds(eq("Alice"), anyList())).thenReturn(List.of("u2", "u1"));
+        List<RankedMatchDTO> ranked = List.of(
+                new RankedMatchDTO("u2", 0.9, "Hiking match", List.of("Hiking")),
+                new RankedMatchDTO("u1", 0.3, "Less similar", List.of())
+        );
+        when(genAiClient.getRankedMatches(eq(new matchingservice.dto.Candidate("u0", "Alice", List.of("Hiking", "Climbing"))), anyList())).thenReturn(ranked);
 
         when(userServiceClient.getUser("u2")).thenReturn(carol);
         when(userServiceClient.getUser("u1")).thenReturn(bob);
-
-        // No DB matches initially
-        // when(matchRepository.findTop1ByUserIdOrderByCreatedAtDesc("u0")).thenReturn(Collections.emptyList());
 
         List<UserDTO> matches = matchingService.findPartners("u0");
         assertEquals(2, matches.size());

@@ -30,9 +30,15 @@ spec:
               name: http
           env:
             - name: AUTH0_DOMAIN
-              value: "{{ .Values.nginxGateway.auth0.domain }}"
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secrets
+                  key: AUTH0_DOMAIN
             - name: AUTH0_AUDIENCE
-              value: "{{ .Values.nginxGateway.auth0.audience }}"
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secrets
+                  key: AUTH0_AUDIENCE
             - name: AUTH0_CLIENT_ID
               valueFrom:
                 secretKeyRef:

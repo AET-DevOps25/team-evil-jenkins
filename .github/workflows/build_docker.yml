@@ -12,6 +12,25 @@ jobs:
     strategy:
       matrix:
         service: [userservice, locationservice, matchingservice, messagingservice]
+
+  genai-python-test:
+    name: Test GenAI Python Service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./genai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run pytest
+        run: PYTHONPATH=. pytest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,7 +113,7 @@ jobs:
   publish-docker-images:
 
     name: Build and publish Docker Images
-    needs: [java-build, build-react-frontend]
+    needs: [java-build, build-react-frontend, genai-python-test]
     runs-on: ubuntu-latest
     strategy:
       matrix:

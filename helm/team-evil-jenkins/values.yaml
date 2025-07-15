@@ -73,9 +73,7 @@ nginxGateway:
     repository: team-evil-jenkins/nginx-gateway
     tag: latest
   resources: {}
-  auth0:
-    domain: "dev-htqjitzqp568np1f.eu.auth0.com"
-    audience: "https://dev-htqjitzqp568np1f.eu.auth0.com/api/v2/"
+
 # Configuration for the GenAI service
 genai:
   enabled: true
@@ -87,9 +85,7 @@ genai:
     type: ClusterIP
     port: 80 # Service port
   resources: {}
-  env: 
-    OPENWEBUI_URL: ""
-    OPENWEBUI_API_KEY: ""
+
 
 # Ingress configuration
 ingress:

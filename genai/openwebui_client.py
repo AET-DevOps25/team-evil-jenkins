@@ -20,23 +20,23 @@ HEADERS = {
 ENDPOINT = config.OPENWEBUI_URL.rstrip("/") + "/api/chat/completions"
 
 
-def rank_candidates(user_profile: str, candidates: List[dict], top_k: int | None = None) -> List[dict]:
-    """Ask the LLM to rank `candidates` for `user_profile`.
+def rank_candidates(user: dict, candidates: List[dict], top_k: int | None = None) -> List[dict]:
+    """Ask the LLM to rank `candidates` for the active user (as a structured dict).
 
     Parameters
     ----------
-    user_profile : str
-        Natural-language description of the active user.
+    user : dict
+        The active user as a structured candidate dict (id, name, sportInterests).
     candidates : List[dict]
         List of candidate user dictionaries. Each dict MUST contain at least an
-        `id` field and a free-text `profile` field.
+        `id` field, `name`, and `sportInterests`.
     top_k : Optional[int]
         Limit the number of ids returned. Defaults to config.TOP_K_MATCHES.
 
     Returns
     -------
-    List[str]
-        Ordered list of candidate ids (best first).
+    List[dict]
+        Ordered list of match objects (id, score, explanation, common_preferences).
     """
     if top_k is None:
         top_k = config.TOP_K_MATCHES
@@ -44,17 +44,17 @@ def rank_candidates(user_profile: str, candidates: List[dict], top_k: int | None
     # Instruct the model VERY CLEARLY to respond with **only** a JSON array of objects.
     # Each object MUST contain: id (string), score (number 0-1), explanation (string), common_preferences (array of strings).
     system_prompt = (
-        "You are a matchmaking engine.  Given one active user and a set of candidate users, "
+        "You are a matchmaking engine.  Given one active user (as a JSON object) and a set of candidate users, "
         "rank the candidates by compatibility and provide additional details.  **Respond ONLY with a JSON "
         "array where each element is an object with the following keys (exact names): id (string), score (number between 0 and 1), "
         "explanation (string), common_preferences (array of strings).  Do NOT wrap the JSON in Markdown fences, do NOT add "
         "extra keys or commentary.  The response MUST look like this (example):\n"
-        "[ {\"id\": \"u17\", \"score\": 0.92, \"explanation\": \"Both play tennis regularly\", \"common_preferences\": [\"Tennis\"]}, "
-        "{\"id\": \"u42\", \"score\": 0.88, \"explanation\": \"Enjoy hiking\", \"common_preferences\": [\"Hiking\"]} ]"
+        '[{"id": "u17", "score": 0.92, "explanation": "Both play tennis regularly", "common_preferences": ["Tennis"]}, '
+        '{"id": "u42", "score": 0.88, "explanation": "Enjoy hiking", "common_preferences": ["Hiking"]} ]'
     )
 
     user_prompt = (
-        "Active user:\n" + user_profile + "\n\n" +
+        "Active user (JSON object):\n" + json.dumps(user, ensure_ascii=False) + "\n\n" +
         "Candidates (JSON, each with id, name, sportInterests):\n" + json.dumps(candidates, ensure_ascii=False)
     )
 

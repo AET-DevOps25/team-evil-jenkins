@@ -34,11 +34,9 @@ spec:
             httpGet:
               path: /health
               port: http
-          env:
-            - name: OPENWEBUI_URL
-              value: "{{ .Values.genai.env.OPENWEBUI_URL | default  }}"
-            - name: OPENWEBUI_API_KEY
-              value: "{{ .Values.genai.env.OPENWEBUI_API_KEY | default  }}"
+          envFrom:
+            - secretRef:
+                name: genai-secrets
           resources:
             {{- toYaml .Values.genai.resources | nindent 12 }}
 {{- end }}
