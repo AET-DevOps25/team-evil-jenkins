@@ -53,7 +53,7 @@ public class UserService {
         if (availability != null)
             user.setAvailability(availability);
         if (sports != null)
-            user.setSportInterestIds(sports);
+            user.setSportInterests(sports);
         userRepository.save(user);
         return true;
     }
