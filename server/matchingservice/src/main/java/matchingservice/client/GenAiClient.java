@@ -15,14 +15,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 public class GenAiClient {
 
-    /**
-     * Temporary compatibility shim for existing unit tests.
-     */
-    @Deprecated
-    public List<String> getRankedIds(String userProfile, List<Candidate> candidates) {
-        return getRankedMatches(userProfile, candidates).stream().map(RankedMatchDTO::id).toList();
-    }
-
     private final WebClient webClient;
 
     public GenAiClient(WebClient.Builder builder,
@@ -37,8 +29,8 @@ public class GenAiClient {
      * @param candidates  List of candidate DTOs (id + profile)
      * @return ordered list of candidate IDs (best match first); empty list on error
      */
-    public List<RankedMatchDTO> getRankedMatches(String userProfile, List<Candidate> candidates) {
-        MatchRequest request = new MatchRequest(userProfile, candidates);
+    public List<RankedMatchDTO> getRankedMatches(Candidate user, List<Candidate> candidates) {
+        MatchRequest request = new MatchRequest(user, candidates);
         try {
             MatchResponse response = webClient.post()
                     .uri("/genai/match")
