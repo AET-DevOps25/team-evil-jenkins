@@ -60,6 +60,9 @@ jobs:
   genai-python-test:
     name: Test GenAI Python Service
     runs-on: ubuntu-latest
+    env:
+      OPENWEBUI_URL: "http://dummy"
+      OPENWEBUI_API_KEY: "dummy-key"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

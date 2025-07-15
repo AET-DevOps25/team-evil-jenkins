@@ -1,7 +1,22 @@
 from fastapi.testclient import TestClient
 from genai.app import app
+import genai.openwebui_client
+import pytest
 
 client = TestClient(app)
+
+@pytest.fixture(autouse=True)
+def patch_rank_candidates(monkeypatch):
+    def fake_rank_candidates(user, candidates, top_k=None):
+        return [
+            {
+                "id": "u1",
+                "score": 0.92,
+                "explanation": "Both enjoy tennis",
+                "common_preferences": ["Tennis"]
+            }
+        ]
+    monkeypatch.setattr(genai.openwebui_client, "rank_candidates", fake_rank_candidates)
 
 def test_match_endpoint_returns_matches():
     payload = {
