@@ -45,7 +45,6 @@ jobs:
             --from-literal=VITE_AUTH0_DOMAIN=${{ vars.AUTH0_DOMAIN }} \
             --from-literal=VITE_AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
             --from-literal=VITE_AUTH0_AUDIENCE=${{ vars.AUTH0_AUDIENCE }} \
-
             -n team-evil-jenkins --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Create/Update GenAI K8s Secret
