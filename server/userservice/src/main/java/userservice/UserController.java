@@ -33,6 +33,8 @@ public class UserController {
         this.userMapper = mapper;
     }
 
+    
+
     @Operation(summary = "Get a user by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the user", content = {
