@@ -102,6 +102,7 @@ function MatchingPage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [location, setLocation] = useState('');
+  const [matches, setMatches] = useState([]);
 
   // validation helpers and Match click handler
   const hasValidAvailability = (avl) => avl && Object.values(avl).some((arr) => Array.isArray(arr) && arr.length);
@@ -127,9 +128,47 @@ function MatchingPage() {
       notify({ type: 'error', message: 'Please specify your availability (at least one day and time slot).' });
       return;
     }
-    // all good – proceed to matching (placeholder)
-    // TODO: call match API once implemented
-    navigate('/matches');
+    // all good – fetch matches from backend
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        // trigger fresh matching run
+        const partnersRes = await fetch(`${API}/matching/partners/${encodeURIComponent(user.sub)}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!partnersRes.ok) {
+          notify({ type: 'error', message: 'Failed to fetch partners' });
+          return;
+        }
+        const users = await partnersRes.json();
+        // fetch scores/history to get match percentage & explanation
+        const historyRes = await fetch(`${API}/matching/history/${encodeURIComponent(user.sub)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        let history = [];
+        if (historyRes.ok) {
+          history = await historyRes.json();
+        }
+        const scoreMap = Object.fromEntries(history.map(h => [h.matchedUserId, h.score]));
+        const explanationMap = Object.fromEntries(history.map(h => [h.matchedUserId, h.explanation]));
+        const commonMap = Object.fromEntries(history.map(h => [h.matchedUserId, h.commonPreferences]));
+        const formatted = users.map(u => ({
+          id: u.id,
+          name: u.name,
+          distance: 0, // TODO backend distance
+          avatar: u.picture || '/images/default-avatar.png',
+          sports: u.sportInterests || [],
+          shared: commonMap[u.id]?.join(', ') || '',
+          match: scoreMap[u.id] ? Math.round(scoreMap[u.id] * 100) : 0,
+          explanation: explanationMap[u.id],
+        }));
+        setMatches(formatted);
+      } catch (e) {
+        console.error('match fetch failed', e);
+        notify({ type: 'error', message: 'Unable to retrieve matches. Try again later.' });
+      }
+    })();
   };
   const [view, setView] = useState('cards');
 
@@ -263,7 +302,7 @@ function MatchingPage() {
               <button className="btn-link edit">⚙️ Edit Preferences</button>
             </div>
             <div className="match-grid">
-              {mockMatches.map((m) => (
+              {(matches.length ? matches : mockMatches).map((m) => (
                 <div key={m.id} className="match-card card">
                   <div className="match-header">
                     <img src={m.avatar} alt={m.name} className="avatar-sm" />
