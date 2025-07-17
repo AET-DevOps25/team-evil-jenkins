@@ -11,26 +11,33 @@
 }
 
 .filters{
+  padding:1rem 1.25rem;
   justify-content:space-between;
   display:flex;
   flex-wrap:wrap;
   gap:1.25rem;
-  align-items:flex-end;
+  align-items:flex-start;
 }
-.filter-item label{display:block;font-size:.8rem;margin-bottom:.25rem;color:var(--text-muted)}
+.filter-item{display:flex;flex-direction:column;gap:.25rem}
+.filter-item label{display:block;font-weight:600;font-size:.8rem;margin-bottom:.25rem;color:var(--text-muted)}
 .filter-item .tags{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .filter-item .tags .btn-xs{background:#fafafa;border-style:dashed;}
-.tag{background:#e7f3ff;font-size:.75rem;padding:.25rem .6rem;border-radius:12px}
-.tag.selected{background:#22C55E20;color:#065f46}
+.tag{background:#e7f3ff;font-size:.85rem;padding:.3rem .7rem;border-radius:12px}
+.tag.selected{background:#DCFCE7;color:#065f46}
 .btn-xs{font-size:.75rem;padding:.25rem .5rem;border:1px solid #d1d5db;border-radius:4px;background:#fff;cursor:pointer}
 .btn-xs.active{background:#22C55E;color:#fff;border-color:#22C55E}
 .input-xs{font-size:.75rem;padding:.25rem .5rem;border:1px solid #d1d5db;border-radius:4px;width:90px;}
 .match-btn{height:38px;padding:0 1.25rem}
-.actions{display:flex;gap:1rem;align-items:flex-end}
-.filter-group{display:flex;flex-wrap:wrap;gap:1.25rem}
+.actions{display:flex;gap:1rem;margin-left:auto}
+.filter-group{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center}
 .refresh{justify-self:end}
 
+.filters-header{display:flex;justify-content:space-between;align-items:center;width:100%}
 .matches-header{display:flex;justify-content:space-between;align-items:center}
+.availability-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+.avail-day{display:flex;gap:.25rem;align-items:center;font-size:.75rem}
+.avail-day .day{font-weight:600;color:var(--primary-text)}
+.avail-day .slot{background:#e0e7ff;color:#3730a3;padding:.25rem .7rem;border-radius:12px;font-size:.85rem}
 .matches-header h3{margin:0}
 .btn-link{background:none;border:none;color:var(--primary);cursor:pointer;font-size:.85rem}
 

@@ -27,6 +27,7 @@ export default function useRegisterUser() {
                         id: user.sub,
                         name: user.name || user.nickname || '',
                         email: user.email,
+                        picture: user.picture,
                     }),
                 });
                 if (!res.ok) {

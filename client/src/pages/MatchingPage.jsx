@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import '../styles/MatchingPage.css';
+import { useNotification } from '../contexts/NotificationContext';
 
 const mockMatches = [
   {
@@ -59,8 +62,124 @@ const mockMatches = [
   },
 ];
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+// simple emoji map for popular sports
+const sportEmojis = {
+  Hiking: '🥾',
+  Running: '🏃',
+  Cycling: '🚴',
+  Swimming: '🏊',
+  Tennis: '🎾',
+  Basketball: '🏀',
+  Soccer: '⚽',
+  Baseball: '⚾',
+  Skiing: '⛷️',
+  Snowboarding: '🏂',
+  Skateboarding: '🛹',
+  Surfing: '🏄',
+  Rowing: '🚣',
+  Boxing: '🥊',
+  'Martial Arts': '🥋',
+  Climbing: '🧗',
+  Golf: '⛳',
+  Dancing: '💃',
+  Yoga: '🧘',
+  Pilates: '🧘',
+  CrossFit: '💪',
+  Weightlifting: '🏋️',
+  Badminton: '🏸',
+  'Table Tennis': '🏓',
+  'Horseback Riding': '🏇',
+  Fencing: '🤺',
+};
+const getSportLabel = (s) => `${sportEmojis[s] || '🏅'} ${s}`;
+
 function MatchingPage() {
+  const { user, getAccessTokenSilently } = useAuth0();
+  const { notify } = useNotification();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+  const [location, setLocation] = useState('');
+
+  // validation helpers and Match click handler
+  const hasValidAvailability = (avl) => avl && Object.values(avl).some((arr) => Array.isArray(arr) && arr.length);
+
+  const handleMatch = () => {
+    if (!profile) {
+      notify({ type: 'error', message: 'Profile data not loaded yet. Please wait a moment.' });
+      return;
+    }
+    if (!location) {
+      notify({ type: 'error', message: 'Location missing. Please enable location sharing and set it in your profile.' });
+      return;
+    }
+    if (!profile.sports || profile.sports.length === 0) {
+      notify({ type: 'error', message: 'Please add at least one sport in your profile before matching.' });
+      return;
+    }
+    if (!profile.skillLevel) {
+      notify({ type: 'error', message: 'Please set your skill level in your profile.' });
+      return;
+    }
+    if (!hasValidAvailability(profile.availability)) {
+      notify({ type: 'error', message: 'Please specify your availability (at least one day and time slot).' });
+      return;
+    }
+    // all good – proceed to matching (placeholder)
+    // TODO: call match API once implemented
+    navigate('/matches');
+  };
   const [view, setView] = useState('cards');
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        // fetch profile
+        const res = await fetch(`${API}/user/${encodeURIComponent(user.sub)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setProfile({
+            sports: data.sportInterests || [],
+            skillLevel: data.skillLevel || '',
+            availability: data.availability || {},
+          });
+        }
+        // fetch location
+        const locRes = await fetch(`${API}/location/${encodeURIComponent(user.sub)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (locRes.ok) {
+          const loc = await locRes.json();
+          if (!loc.latitude || !loc.longitude) {
+            console.error('location not found', loc);
+            notify({ type: 'error', message: 'Location not found. Make sure you have enabled location sharing in your browser settings.' });
+            return;
+          }
+          try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${loc.latitude}&lon=${loc.longitude}&format=json`);
+            if (resp.ok) {
+              const info = await resp.json();
+              setLocation(info.display_name || `${loc.latitude}, ${loc.longitude}`);
+            } else {
+              console.error('reverse geocode failed', resp);
+            }
+          } catch (e) {
+            console.error('reverse geocode failed', e);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load profile for filters', err);
+        notify({ type: 'error', message: 'Failed to load profile for filters' });
+      }
+    })();
+  }, [user, getAccessTokenSilently]);
+
 
   return (
     <>
@@ -68,51 +187,71 @@ function MatchingPage() {
       <section className="matching-page container">
         {/* Filters */}
         <div className="filters card">
+          <div className="filters-header">
+            <h4>Your Filters</h4>
+            <button
+              className="btn-link edit"
+              title="Edit filters"
+              onClick={() => navigate('/profile')}
+            >
+              Edit Preferences ✏️
+            </button>
+          </div>
           <div className="filter-group">
+            {/* Location */}
             <div className="filter-item">
-              <label htmlFor="loc">Location</label>
-              <select id="loc" defaultValue="San Francisco, CA">
-                <option>San Francisco, CA</option>
-                <option>Los Angeles, CA</option>
-              </select>
-          </div>
-
-          <div className="filter-item">
-            <label>Sports</label>
-            <div className="tags">
-              <span className="tag selected">Running</span>
-              <span className="tag selected">Cycling</span>
-              <input type="text" placeholder="Add sport" className="input-xs" />
+              <label>Location</label>
+              <div className="tags">
+                {location ? (
+                  <span className="tag location" title={location}><span className="icon">📍</span> {location}</span>
+                ) : (
+                  <span className="text-muted">Unknown</span>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="filter-item">
-            <label>Availability</label>
-            <select defaultValue="Weekday Mornings">
-              <option>Weekday Mornings</option>
-              <option>Weekday Evenings</option>
-              <option>Weekends</option>
-            </select>
-          </div>
+            <div className="filter-item">
+              <label>Sports</label>
+              <div className="tags">
+                {profile?.sports?.length ? (
+                  profile.sports.map((s) => (
+                    <span key={s} className="tag selected">{getSportLabel(s)}</span>
+                  ))
+                ) : (
+                  <span className="text-muted">None</span>
+                )}
+              </div>
+            </div>
+
+            <div className="filter-item">
+              <label>Skill</label>
+              <span className="badge skill">{profile?.skillLevel || 'Not set'}</span>
+            </div>
+
+            <div className="filter-item">
+              <label>Availability</label>
+              <div className="availability-grid">
+                {profile?.availability && Object.entries(profile.availability)
+                  .filter(([, times]) => times.length)
+                  .map(([day, times]) => (
+                    <div key={day} className="avail-day">
+                      <span className="day">{day.substring(0, 3)}</span>
+                      {times.map((t) => (
+                        <span key={t} className="slot">{t}</span>
+                      ))}
+                    </div>
+                  ))}
+                {!profile?.availability && (
+                  <span className="text-muted">Not set</span>
+                )}
+              </div>
+            </div>
 
           </div>
 
           <div className="actions">
-            <div className="filter-item view-toggle">
-              <button
-                className={`btn-xs ${view === 'cards' ? 'active' : ''}`}
-                onClick={() => setView('cards')}
-              >
-                📇 Cards
-              </button>
-              <button
-                className={`btn-xs ${view === 'map' ? 'active' : ''}`}
-                onClick={() => setView('map')}
-              >
-                🗺️ Map
-              </button>
-            </div>
-            <button className="btn btn-primary match-btn">Match</button>
+
+            <button className="btn btn-primary match-btn" onClick={handleMatch}>Match</button>
           </div>
         </div>
 

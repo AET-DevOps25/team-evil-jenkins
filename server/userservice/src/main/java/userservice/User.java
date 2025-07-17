@@ -1,9 +1,10 @@
 package userservice;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -23,12 +24,19 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
+    @Column(name = "picture")
+    private String picture;
+
+    @Column(name = "bio")
     private String bio;
 
+    @Column(name = "skill_level")
     private String skillLevel;
 
-    @Transient
-    private Map<String, List<String>> availability;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "user_availability", joinColumns = @JoinColumn(name = "user_id"), uniqueConstraints = @UniqueConstraint(columnNames = {
+            "user_id", "day", "slot" }))
+    private Set<AvailabilitySlot> availability = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_group_ids", joinColumns = @JoinColumn(name = "user_id"))
@@ -38,7 +46,7 @@ public class User {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_sport_interests", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "sport_interests")
-    public List<String> sportInterests;
+    private List<String> sportInterests;
 
     public User() {
     }
@@ -77,11 +85,11 @@ public class User {
         this.skillLevel = skillLevel;
     }
 
-    public Map<String, List<String>> getAvailability() {
+    public Set<AvailabilitySlot> getAvailability() {
         return availability;
     }
 
-    public void setAvailability(Map<String, List<String>> availability) {
+    public void setAvailability(Set<AvailabilitySlot> availability) {
         this.availability = availability;
     }
 
@@ -95,6 +103,14 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
     public List<String> getGroupIds() {
