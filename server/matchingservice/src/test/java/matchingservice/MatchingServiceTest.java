@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,20 +25,18 @@ class MatchingServiceTest {
     private GenAiClient genAiClient;
     @Mock
     private UserServiceClient userServiceClient;
-    
+
     @Mock
     private MatchRepository matchRepository;
 
     @InjectMocks
     private MatchingService matchingService;
 
-
-
     @Test
     void returnsTopRankedUser() {
-        UserDTO requester = new UserDTO("u0", "Alice", List.of("Hiking", "Climbing"));
-        UserDTO bob = new UserDTO("u1", "Bob", List.of("Swimming"));
-        UserDTO carol = new UserDTO("u2", "Carol", List.of("Hiking"));
+        UserDTO requester = new UserDTO("u0", "Alice", "", "", "", java.util.Map.of(), List.of("Hiking", "Climbing"));
+        UserDTO bob = new UserDTO("u1", "Bob", "", "", "", java.util.Map.of(), List.of("Swimming"));
+        UserDTO carol = new UserDTO("u2", "Carol", "", "", "", java.util.Map.of(), List.of("Hiking"));
 
         when(userServiceClient.getUser("u0")).thenReturn(requester);
         when(userServiceClient.getNearbyUsers(eq("u0"), eq(50.0))).thenReturn(List.of(requester, bob, carol));
