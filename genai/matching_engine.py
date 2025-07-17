@@ -10,16 +10,19 @@ class MatchingEngine:
     def __init__(self):
         pass
 
-    def match(self, user_profile: str, candidates: List[dict]) -> List[dict]:
-        """Return ordered list of candidate IDs representing best matches using OpenWebUI."""
-        # All candidates are dicts with id, name, sportInterests
-        return openwebui_client.rank_candidates(user_profile, candidates)
+    def match(self, user: dict, candidates: List[dict]) -> List[dict]:
+        """Return ordered list of match objects using OpenWebUI (user and candidates as dicts)."""
+        # All candidates and user are dicts with id, name, sportInterests
+        return openwebui_client.rank_candidates(user, candidates)
 
 
 if __name__ == "__main__":
     # Example usage
     engine = MatchingEngine()
-    user = "Sporty person who likes tennis"
-    candidates = ["Football fan", "Tennis enthusiast", "Casual runner"]
+    user = {"id": "u1", "name": "Alice", "sportInterests": ["Tennis", "Hiking"]}
+    candidates = [
+        {"id": "u2", "name": "Bob", "sportInterests": ["Tennis", "Swimming"]},
+        {"id": "u3", "name": "Carol", "sportInterests": ["Chess", "Reading"]}
+    ]
     scores = engine.match(user, candidates)
     print("Matching scores:", scores)

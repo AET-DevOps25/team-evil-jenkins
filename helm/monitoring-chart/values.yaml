@@ -1,0 +1,53 @@
+# We use the release name for resources, so fullnameOverride is not needed here.
+# This allows you to install multiple instances with different release names.
+
+prometheus:
+  image:
+    repository: prom/prometheus
+    tag: v2.52.0
+  service:
+    type: ClusterIP
+    port: 9090
+  config:
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+      - job_name: 'user-service'
+        metrics_path: '/api/actuator/prometheus'
+        static_configs:
+          - targets: ['user-service:8080']
+      - job_name: 'location-service'
+        metrics_path: '/api/actuator/prometheus'
+        static_configs:
+          - targets: ['location-service:8080']
+      - job_name: 'matching-service'
+        metrics_path: '/api/actuator/prometheus'
+        static_configs:
+          - targets: ['matching-service:8080']
+      - job_name: 'messaging-service'
+        metrics_path: '/api/actuator/prometheus'
+        static_configs:
+          - targets: ['messaging-service:8080']
+
+grafana:
+  image:
+    repository: grafana/grafana-oss
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 3000
+  adminUser: admin
+  adminPassword: admin
+  provisioning:
+    enabled: true
+    datasource:
+      name: Prometheus
+      type: prometheus
+      access: proxy
+      # The URL now correctly uses the release name
+      url: http://{{ .Release.Name }}-prometheus-service:9090
+      isDefault: true

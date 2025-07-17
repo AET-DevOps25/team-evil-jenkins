@@ -1,0 +1,18 @@
+{{- if .Values.grafana.provisioning.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "monitoring-chart.fullname" . }}-grafana-config
+  labels:
+    {{- include "monitoring-chart.labels" . | nindent 4 }}
+    grafana_datasource: "1"
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: {{ .Values.grafana.provisioning.datasource.name }}
+      type: {{ .Values.grafana.provisioning.datasource.type }}
+      access: {{ .Values.grafana.provisioning.datasource.access }}
+      url: {{ tpl .Values.grafana.provisioning.datasource.url . }}
+      isDefault: {{ .Values.grafana.provisioning.datasource.isDefault }}
+{{- end }}

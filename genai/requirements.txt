@@ -2,3 +2,5 @@ fastapi
 python-dotenv
 uvicorn[standard]
 requests
+pytest
+httpx
