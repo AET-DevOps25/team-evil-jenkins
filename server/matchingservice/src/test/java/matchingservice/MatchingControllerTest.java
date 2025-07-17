@@ -30,44 +30,42 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MatchingController.class)
 class MatchingControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private MatchingService matchingService;
+        @MockBean
+        private MatchingService matchingService;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+        private final ObjectMapper mapper = new ObjectMapper();
 
-    @Test
-    @DisplayName("POST /matching/partners/{userId} returns list of matched users and triggers service call")
-    void partnersEndpointReturnsMatches() throws Exception {
-        List<UserDTO> mocked = List.of(
-                new UserDTO("u2", "Carol", List.of("Hiking")),
-                new UserDTO("u1", "Bob", List.of("Tennis"))
-        );
-        Mockito.when(matchingService.findPartners("u0")).thenReturn(mocked);
+        @Test
+        @DisplayName("POST /matching/partners/{userId} returns list of matched users and triggers service call")
+        void partnersEndpointReturnsMatches() throws Exception {
+                List<UserDTO> mocked = List.of(
+                                new UserDTO("u2", "Carol", "", "", "", java.util.Map.of(), List.of("Hiking")),
+                                new UserDTO("u1", "Bob", "", "", "", java.util.Map.of(), List.of("Tennis")));
+                Mockito.when(matchingService.findPartners("u0")).thenReturn(mocked);
 
-        mockMvc.perform(post("/matching/partners/u0"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is("u2")))
-                .andExpect(jsonPath("$[1].id", is("u1")));
-    }
+                mockMvc.perform(post("/matching/partners/u0"))
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$", hasSize(2)))
+                                .andExpect(jsonPath("$[0].id", is("u2")))
+                                .andExpect(jsonPath("$[1].id", is("u1")));
+        }
 
-    @Test
-    @DisplayName("GET /matching/history/{userId} returns stored matches")
-    void historyEndpointReturnsStoredMatches() throws Exception {
-        List<MatcherDTO> stored = List.of(
-                new MatcherDTO("u2", 0.9, "Great hiking match", List.of("Hiking"), Instant.now())
-        );
-        Mockito.when(matchingService.getMatches("u0")).thenReturn(stored);
+        @Test
+        @DisplayName("GET /matching/history/{userId} returns stored matches")
+        void historyEndpointReturnsStoredMatches() throws Exception {
+                List<MatcherDTO> stored = List.of(
+                                new MatcherDTO("u2", 0.9, "Great hiking match", List.of("Hiking"), Instant.now()));
+                Mockito.when(matchingService.getMatches("u0")).thenReturn(stored);
 
-        mockMvc.perform(get("/matching/history/u0"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].matchedUserId", is("u2")))
-                .andExpect(jsonPath("$[0].score", is(0.9)));
-    }
+                mockMvc.perform(get("/matching/history/u0"))
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0].matchedUserId", is("u2")))
+                                .andExpect(jsonPath("$[0].score", is(0.9)));
+        }
 }
