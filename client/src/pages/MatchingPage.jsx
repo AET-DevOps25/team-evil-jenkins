@@ -103,11 +103,13 @@ function MatchingPage() {
   const [profile, setProfile] = useState(null);
   const [location, setLocation] = useState('');
   const [matches, setMatches] = useState([]);
+  const [matchingLoading, setMatchingLoading] = useState(false);
 
   // validation helpers and Match click handler
   const hasValidAvailability = (avl) => avl && Object.values(avl).some((arr) => Array.isArray(arr) && arr.length);
 
   const handleMatch = () => {
+    setMatchingLoading(true);
     if (!profile) {
       notify({ type: 'error', message: 'Profile data not loaded yet. Please wait a moment.' });
       return;
@@ -164,9 +166,11 @@ function MatchingPage() {
           explanation: explanationMap[u.id],
         }));
         setMatches(formatted);
+        setMatchingLoading(false);
       } catch (e) {
         console.error('match fetch failed', e);
         notify({ type: 'error', message: 'Unable to retrieve matches. Try again later.' });
+        setMatchingLoading(false);
       }
     })();
   };
@@ -296,37 +300,43 @@ function MatchingPage() {
 
         {/* Matches list */}
         {view === 'cards' && (
-          <>
-            <div className="matches-header">
-              <h3>Top Matches for You</h3>
-              <button className="btn-link edit">⚙️ Edit Preferences</button>
+          matchingLoading ? (
+            <div className="match-loader">
+              <div className="spinner" />
+              <p>Finding your best matches…</p>
             </div>
-            <div className="match-grid">
-              {(matches.length ? matches : mockMatches).map((m) => (
-                <div key={m.id} className="match-card card">
-                  <div className="match-header">
-                    <img src={m.avatar} alt={m.name} className="avatar-sm" />
-                    <div>
-                      <h4>{m.name}</h4>
-                      <span className="distance">{m.distance} km away</span>
+          ) : (
+            <>
+              <div className="matches-header">
+                <h3>Top Matches for You</h3>
+                <button className="btn-link edit">⚙️ Edit Preferences</button>
+              </div>
+              <div className="match-grid">
+                {(matches.length ? matches : mockMatches).map((m) => (
+                  <div key={m.id} className="match-card card">
+                    <div className="match-header">
+                      <img src={m.avatar} alt={m.name} className="avatar-sm" />
+                      <div>
+                        <h4>{m.name}</h4>
+                        <span className="distance">{m.distance} km away</span>
+                      </div>
+                      <span className="badge">{m.match}% Match</span>
                     </div>
-                    <span className="badge">{m.match}% Match</span>
+                    <div className="sports-list">
+                      {m.sports.map((s) => (
+                        <span key={s} className="sport-chip">{s}</span>
+                      ))}
+                    </div>
+                    <p className="shared">Shared interests: {m.shared}</p>
+                    <button className="btn btn-secondary full send" onClick={() => handleSendMessage(m)}>💬 Send Message</button>
                   </div>
-                  <div className="sports-list">
-                    {m.sports.map((s) => (
-                      <span key={s} className="sport-chip">{s}</span>
-                    ))}
-                  </div>
-                  <p className="shared">Shared interests: {m.shared}</p>
-                  <button className="btn btn-secondary full send">💬 Send Message</button>
-                </div>
-              ))}
-            </div>
-            <div className="load-more-wrapper">
-              <button className="btn btn-outline">Load More Matches</button>
-            </div>
-          </>
-        )}
+                ))}
+              </div>
+              <div className="load-more-wrapper">
+                <button className="btn btn-outline" disabled={matchingLoading}>Load More Matches</button>
+              </div>
+            </>
+          ))}
         {view === 'map' && (
           <div className="map-placeholder card">Map view coming soon…</div>
         )}
@@ -334,5 +344,25 @@ function MatchingPage() {
     </>
   );
 }
+
+// add contact and redirect to messages
+const handleSendMessage = async (match) => {
+  try {
+    const token = await getAccessTokenSilently();
+    const res = await fetch(`${API}/messaging/contact?userId=${encodeURIComponent(user.sub)}&contactId=${encodeURIComponent(match.id)}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      notify({ type: 'success', message: `Contact ${match.name} added! You can now chat.` });
+      navigate('/messages');
+    } else {
+      notify({ type: 'error', message: 'Failed to add contact. Please try again.' });
+    }
+  } catch (err) {
+    console.error(err);
+    notify({ type: 'error', message: 'Failed to add contact.' });
+  }
+};
 
 export default MatchingPage;

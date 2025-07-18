@@ -50,4 +50,16 @@ public class MessagingController {
             @Parameter(description = "Page size") @RequestParam(defaultValue = "50") int size) {
         return ResponseEntity.ok(messagingService.getConversation(userA, userB, page, size));
     }
+
+    @Operation(summary = "Add another user to contact list")
+    @PostMapping("/contact")
+    public ResponseEntity<?> addContact(@RequestParam String userId, @RequestParam String contactId) {
+        return ResponseEntity.ok(messagingService.addContact(userId, contactId));
+    }
+
+    @Operation(summary = "Get all contacts of a user")
+    @GetMapping("/contacts/{userId}")
+    public ResponseEntity<?> getContacts(@PathVariable String userId) {
+        return ResponseEntity.ok(messagingService.getContacts(userId));
+    }
 }
