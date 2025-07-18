@@ -33,6 +33,8 @@ public class UserController {
         this.userMapper = mapper;
     }
 
+    
+
     @Operation(summary = "Get a user by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the user", content = {
@@ -68,6 +70,20 @@ public class UserController {
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+    }
+
+    @Operation(summary = "Update a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully", content = @Content(mediaType = "text/plain")),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable("id") String id, @RequestBody UpdateUserRequest req) {
+        boolean ok = userService.updateUser(id, req.firstName(), req.lastName(), req.bio(), req.skillLevel(), req.availability(), req.sports());
+        if (ok)
+            return ResponseEntity.ok("User updated");
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
 
     @Operation(summary = "Delete a user by their ID")

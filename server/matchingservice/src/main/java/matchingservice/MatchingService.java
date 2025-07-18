@@ -36,7 +36,7 @@ public class MatchingService {
         if (user == null) {
             return null;
         }
-        String userProfile = user.name();
+        Candidate userCandidate = new Candidate(user.id(), user.name(), user.sportInterests());
         // fetch candidate users (nearby)
         List<UserDTO> allUsers = userServiceClient.getNearbyUsers(userId, 50.0); // 50km radius
         // Ensure active user is included in candidates
@@ -46,9 +46,10 @@ public class MatchingService {
             allUsers.add(user);
         }
         List<Candidate> candidates = allUsers.stream()
+            .filter(u -> !u.id().equals(userId)) // exclude the main user from candidates
             .map(u -> new Candidate(u.id(), u.name(), u.sportInterests()))
             .toList();
-        List<RankedMatchDTO> ranked = genAiClient.getRankedMatches(userProfile, candidates);
+        List<RankedMatchDTO> ranked = genAiClient.getRankedMatches(userCandidate, candidates);
         if (ranked == null || ranked.isEmpty()) {
             System.err.println("WARNING: GenAI returned null or empty ranked match list. Returning no matches.");
             return Collections.emptyList();

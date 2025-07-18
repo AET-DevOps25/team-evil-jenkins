@@ -2,9 +2,10 @@ package userservice;
 
 import org.springframework.stereotype.Service;
 
-import model.LocationDTO;
-
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional; // Import Optional
 
 @Service
@@ -27,12 +28,41 @@ public class UserService {
     }
 
     public void addUser(User user) {
-        // The save method works for both creating and updating entities
+        // avoid overwriting an existing profile with blank/default data
+        if (userRepository.existsById(user.getId())) {
+            // already exists – do not overwrite
+            return;
+        }
         userRepository.save(user);
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public boolean updateUser(String id, String firstName, String lastName, String bio, String skillLevel,
+            Map<String, List<String>> availability, List<String> sports) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null)
+            return false;
+        if (firstName != null || lastName != null) {
+            user.setName(String.format("%s %s", firstName != null ? firstName : user.getName().split(" ")[0],
+                    lastName != null ? lastName : (user.getName().contains(" ") ? user.getName().split(" ", 2)[1] : ""))
+                    .trim());
+        }
+        if (bio != null)
+            user.setBio(bio);
+        if (skillLevel != null)
+            user.setSkillLevel(skillLevel);
+        if (availability != null) {
+            Set<AvailabilitySlot> slots = new HashSet<>();
+            availability.forEach((day, list) -> list.forEach(slot -> slots.add(new AvailabilitySlot(day, slot))));
+            user.setAvailability(slots);
+        }
+        if (sports != null)
+            user.setSportInterests(sports);
+        userRepository.save(user);
+        return true;
     }
 
     public boolean deleteUserById(String id) {

@@ -19,7 +19,7 @@ class Candidate(BaseModel):
 
 
 class MatchRequest(BaseModel):
-    user_profile: str = Field(..., description="Active user profile in natural language")
+    user: Candidate = Field(..., description="Active user as a Candidate object")
     candidates: List[Candidate] = Field(..., description="List of candidate users to rank")
 
 
@@ -35,16 +35,17 @@ class MatchResponse(BaseModel):
 
 @router.post("/match", response_model=MatchResponse)
 async def match(req: MatchRequest) -> MatchResponse:  # noqa: D401  (simple func)
-    if not req.user_profile.strip():
-        raise HTTPException(status_code=400, detail="user_profile cannot be empty")
+    if not req.user:
+        raise HTTPException(status_code=400, detail="user cannot be empty")
     if not req.candidates:
         raise HTTPException(status_code=400, detail="candidates list cannot be empty")
 
     # Convert Candidate models to dicts
-    candidates_data: List[Dict] = [c.dict() for c in req.candidates]
+    user_data = req.user.model_dump()
+    candidates_data: List[Dict] = [c.model_dump() for c in req.candidates]
 
     try:
-        ranked = engine.match(req.user_profile, candidates_data)
+        ranked = engine.match(user_data, candidates_data)
         return MatchResponse(matches=ranked)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=f"Matching failed: {exc}") from exc

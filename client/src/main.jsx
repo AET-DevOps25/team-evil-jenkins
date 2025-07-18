@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { Auth0Provider } from '@auth0/auth0-react';
 import './index.css';
 import './styles/formOverrides.css';
+import { NotificationProvider } from './contexts/NotificationContext.jsx';
+import './styles/Notification.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
@@ -16,9 +18,11 @@ createRoot(document.getElementById('root')).render(
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
       }}
     >
-      <BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
         <App />
-      </BrowserRouter>
+        </BrowserRouter>
+      </NotificationProvider>
     </Auth0Provider>
   </StrictMode>
 );

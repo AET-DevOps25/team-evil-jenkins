@@ -2,7 +2,8 @@ import './App.css';
 import { Routes, Route } from 'react-router-dom';
 
 import LandingPage from './pages/LandingPage';
-import CallbackPage from './pages/CallbackPage';
+import CallbackPage from './pages/CallbackPage.jsx';
+import useUpdateLocation from './hooks/useUpdateLocation.js';
 import RequireAuth from './components/RequireAuth';
 import useRegisterUser from './hooks/useRegisterUser';
 import SignInPage from './pages/SignInPage';
@@ -11,14 +12,17 @@ import ProfilePage from './pages/ProfilePage';
 import MessagesPage from './pages/MessagesPage';
 import MatchingPage from './pages/MatchingPage';
 import NotFoundPage from './pages/NotFoundPage';
+import Home from './pages/LandingPage';
 
 function App() {
   // Ensure user profile exists in backend once authenticated
   useRegisterUser();
+  useUpdateLocation();
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/callback" element={<CallbackPage />} />
+      <Route path="/home" element={<Home />} />
       <Route path="/signin/" element={<SignInPage />} />
       <Route path="/signup/" element={<SignUpPage />} />
       <Route

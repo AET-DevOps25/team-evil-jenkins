@@ -12,6 +12,8 @@ jobs:
     strategy:
       matrix:
         service: [userservice, locationservice, matchingservice, messagingservice]
+
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,6 +56,25 @@ jobs:
           name: ${{ matrix.service }}-${{ steps.get_version.outputs.version }}-jar
           path: server/${{ matrix.service }}/build/libs/*.jar
 
+  
+  genai-python-test:
+    name: Test GenAI Python Service
+    runs-on: ubuntu-latest
+    env:
+      OPENWEBUI_URL: "http://dummy"
+      OPENWEBUI_API_KEY: "dummy-key"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r genai/requirements.txt
+      - name: Run pytest
+        run: PYTHONPATH=. pytest genai/tests
+
   build-react-frontend:
     name: Build React Frontend
     runs-on: ubuntu-latest
@@ -94,7 +115,7 @@ jobs:
   publish-docker-images:
 
     name: Build and publish Docker Images
-    needs: [java-build, build-react-frontend]
+    needs: [java-build, build-react-frontend, genai-python-test]
     runs-on: ubuntu-latest
     strategy:
       matrix:

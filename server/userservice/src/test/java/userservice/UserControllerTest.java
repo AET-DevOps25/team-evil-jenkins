@@ -55,7 +55,7 @@ public class UserControllerTest {
 
     @Test
     public void testAddUser() throws Exception {
-        UserDTO user = new UserDTO("1", "Alice", new ArrayList<String>());
+        UserDTO user = new UserDTO("1", "Alice", "", "", "", java.util.Map.of(), new ArrayList<>());
 
         mockMvc.perform(post("/user")
                 .contentType(MediaType.APPLICATION_JSON)

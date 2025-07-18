@@ -1,0 +1,55 @@
+/* Container to stack notifications */
+.notification-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 9999;
+}
+
+/* Toast base style */
+.notification {
+  display: flex;
+  align-items: center;
+  min-width: 260px;
+  max-width: 320px;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  color: #fff;
+  font-size: 0.9rem;
+  animation: slide-in 0.35s ease-out forwards;
+}
+
+.notification .icon {
+  margin-right: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.notification .message {
+  flex: 1;
+}
+
+.notification .close-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+/* Color variations */
+.toast-success { background: #2e7d32; }
+.toast-error   { background: #c62828; }
+.toast-warning { background: #ef6c00; }
+.toast-info    { background: #1565c0; }
+
+/* Slide-in animation */
+@keyframes slide-in {
+  0%   { opacity: 0; transform: translateX(100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
