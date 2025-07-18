@@ -1,13 +1,7 @@
 name: Deploy to Kubernetes via Helm
 
 on:
-  push:
-    branches:
-      - main
-  workflow_run:
-    workflows: ["Build Docker Images"]
-    types:
-      - completed
+  workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-latest
