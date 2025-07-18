@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNotification } from '../contexts/NotificationContext';
 
 /**
  * Continuously send the users geolocation to the Location micro-service.
@@ -18,6 +19,7 @@ import { useAuth0 } from '@auth0/auth0-react';
  */
 export default function useUpdateLocation(intervalMs = 30_000) {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const { notify } = useNotification();
     const watchIdRef = useRef(null);
     const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
 
@@ -57,7 +59,7 @@ export default function useUpdateLocation(intervalMs = 30_000) {
         // Browser live updates
         watchIdRef.current = navigator.geolocation.watchPosition(
             pos => sendLocation(pos.coords),
-            err => console.error('Geolocation error', err),
+            err => notify({ type: 'error', message: 'Geolocation error. Make sure you have enabled location sharing in your browser settings.' }),
             { enableHighAccuracy: false, maximumAge: 10000, timeout: 20000 },
         );
 

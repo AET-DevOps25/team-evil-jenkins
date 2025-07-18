@@ -2,8 +2,8 @@ package userservice;
 
 import org.springframework.stereotype.Service;
 
-import model.LocationDTO;
-
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional; // Import Optional
@@ -28,7 +28,11 @@ public class UserService {
     }
 
     public void addUser(User user) {
-        // The save method works for both creating and updating entities
+        // avoid overwriting an existing profile with blank/default data
+        if (userRepository.existsById(user.getId())) {
+            // already exists – do not overwrite
+            return;
+        }
         userRepository.save(user);
     }
 
@@ -50,8 +54,11 @@ public class UserService {
             user.setBio(bio);
         if (skillLevel != null)
             user.setSkillLevel(skillLevel);
-        if (availability != null)
-            user.setAvailability(availability);
+        if (availability != null) {
+            Set<AvailabilitySlot> slots = new HashSet<>();
+            availability.forEach((day, list) -> list.forEach(slot -> slots.add(new AvailabilitySlot(day, slot))));
+            user.setAvailability(slots);
+        }
         if (sports != null)
             user.setSportInterests(sports);
         userRepository.save(user);
