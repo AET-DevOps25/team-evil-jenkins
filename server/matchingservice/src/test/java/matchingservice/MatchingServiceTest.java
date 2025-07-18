@@ -47,7 +47,7 @@ class MatchingServiceTest {
                 new RankedMatchDTO("u2", 0.9, "Hiking match", List.of("Hiking")),
                 new RankedMatchDTO("u1", 0.3, "Less similar", List.of())
         );
-        when(genAiClient.getRankedMatches(eq(new matchingservice.dto.Candidate("u0", "Alice", List.of("Hiking", "Climbing"))), anyList())).thenReturn(ranked);
+        when(genAiClient.getRankedMatches(eq(new matchingservice.dto.Candidate("u0", "Alice", List.of("Hiking", "Climbing"), "", "")), anyList())).thenReturn(ranked);
 
         when(userServiceClient.getUser("u2")).thenReturn(carol);
         when(userServiceClient.getUser("u1")).thenReturn(bob);
