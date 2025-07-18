@@ -29,7 +29,7 @@ data "aws_subnets" "default" {
 }
 
 resource "aws_security_group" "web_sg" {
-  name        = "${var.project_name}-web-sg"
+  name        = "team-evil-jenkins-web-sg"
   description = "Allow SSH, HTTP, and application ports"
   vpc_id      = var.vpc_id == "" ? data.aws_vpc.default.id : var.vpc_id
 
