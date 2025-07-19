@@ -20,10 +20,10 @@ spec:
         redeploy-timestamp: "{{ .Values.redeploy | default "" }}"
         rollme: "{{ randAlphaNum 5 | quote }}"
     spec:
-      {{- if .Values.imagePullSecrets }}
+{{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
-      {{- end }}
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+{{- end }}
       serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
       securityContext:
         {{- .Values.client.podSecurityContext | toYaml | nindent 8 }}
