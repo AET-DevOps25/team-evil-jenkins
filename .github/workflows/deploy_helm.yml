@@ -2,7 +2,7 @@ name: Deploy Manually to Kubernetes via Helm
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, connecting-client-with-backend ]
   workflow_dispatch:
 jobs:
   deploy:
