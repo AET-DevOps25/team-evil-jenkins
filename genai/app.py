@@ -13,10 +13,11 @@ load_dotenv()
 app = FastAPI(title="GenAI Service")
 app.include_router(matching_router)
 
+Instrumentator().instrument(app).expose(app)
+
 @app.on_event("startup")
 async def startup():
     """Instrument the app with Prometheus metrics."""
-    Instrumentator().instrument(app).expose(app)
 
 @app.get("/health")
 async def health():
