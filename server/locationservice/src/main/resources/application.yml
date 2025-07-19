@@ -4,9 +4,9 @@ server:
 # All Spring-related properties are nested under a single 'spring' key
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/location_service_db
-    username: admin
-    password: your_secure_password
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     properties:
       hibernate:

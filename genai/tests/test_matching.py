@@ -20,10 +20,10 @@ def patch_rank_candidates(monkeypatch):
 
 def test_match_endpoint_returns_matches():
     payload = {
-        "user": {"id": "u0", "name": "Alice", "sportInterests": ["Tennis", "Hiking"]},
+        "user": {"id": "u0", "name": "Alice", "sportInterests": ["Tennis", "Hiking"], "bio": "", "skillLevel": ""},
         "candidates": [
-            {"id": "u1", "name": "Bob", "sportInterests": ["Tennis", "Swimming"]},
-            {"id": "u2", "name": "Carol", "sportInterests": ["Chess", "Reading"]}
+            {"id": "u1", "name": "Bob", "sportInterests": ["Tennis", "Swimming"], "bio": "", "skillLevel": ""},
+            {"id": "u2", "name": "Carol", "sportInterests": ["Chess", "Reading"], "bio": "", "skillLevel": ""}
         ]
     }
     response = client.post("/genai/match", json=payload)
