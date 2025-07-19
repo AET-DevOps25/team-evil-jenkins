@@ -79,7 +79,16 @@ public class UserController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable("id") String id, @RequestBody UpdateUserRequest req) {
-        boolean ok = userService.updateUser(id, req.firstName(), req.lastName(), req.bio(), req.skillLevel(), req.availability(), req.sports());
+        boolean ok = userService.updateUser(
+                id,
+                req.firstName(),
+                req.lastName(),
+                req.bio(),
+                req.skillLevel(),
+                req.availability(),
+                req.sports(),
+                req.picture()
+        );
         if (ok)
             return ResponseEntity.ok("User updated");
         else

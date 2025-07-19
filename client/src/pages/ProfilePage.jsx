@@ -55,43 +55,41 @@ function ProfilePage() {
         }
     }, [user]);
 
-    // Helper to fetch profile from backend
-    const fetchProfile = async () => {
-        if (!user) return;
-        try {
-            const token = await getAccessTokenSilently();
-            const res = await fetch(`${API_URL}/user/${encodeURIComponent(user.sub)}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            const nameParts = (data.name || '').split(' ');
-            setForm(prev => {
-                const next = {
-                    ...prev,
-                    firstName: nameParts[0] || '',
-                    lastName: nameParts.slice(1).join(' '),
-                    email: data.email || prev.email,
-                    bio: data.bio || '',
-                    skillLevel: data.skillLevel || '',
-                    sports: data.sportInterests || [],
-                    availability: { ...initialState.availability, ...(data.availability || {}) },
-                    avatar: data.picture || prev.avatar,
-                };
-                setOriginal(next);
-                return next;
-            });
-            if (data.sportInterests) {
-                setExtraSports(() => {
-                    const extras = data.sportInterests.filter((s) => !allSports.includes(s));
-                    return extras;
-                });
-            }
-        } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error('Failed to fetch user profile', e);
+    // Handle avatar upload
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setForm(prev => ({ ...prev, avatar: reader.result }));
+            };
+            reader.readAsDataURL(file);
         }
     };
+
+    // Avatar upload UI helper
+    const avatarUploadSection = (
+        <div className="avatar-upload-section" style={{ marginBottom: 24, textAlign: 'center' }}>
+            <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+            />
+            <label htmlFor="avatar-upload" style={{ cursor: 'pointer', display: 'inline-block' }}>
+                <div className="avatar-preview" style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', margin: '0 auto', border: '2px solid #eee', background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {form.avatar ? (
+                        <img src={form.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        <span style={{ color: '#aaa' }}>Click to upload</span>
+                    )}
+                </div>
+                <div style={{ marginTop: 8, color: '#444' }}>Change Profile Picture</div>
+            </label>
+        </div>
+    );
+
 
     // fetch full profile from backend
     useEffect(() => {
@@ -236,6 +234,12 @@ function ProfilePage() {
         e.preventDefault();
         try {
             const token = await getAccessTokenSilently();
+            // Only send a small URL for avatar
+            let avatarUrl = form.avatar;
+            // If avatar is base64 (data:image/...), use user.picture or a default
+            if (avatarUrl && avatarUrl.startsWith('data:image/')) {
+                avatarUrl = user.picture || '/images/default-avatar.png';
+            }
             const body = {
                 firstName: form.firstName,
                 lastName: form.lastName,
@@ -243,6 +247,7 @@ function ProfilePage() {
                 skillLevel: form.skillLevel,
                 availability: form.availability,
                 sports: form.sports,
+                picture: avatarUrl,
             };
             const res = await fetch(`${API_URL}/user/${user.sub}`, {
                 method: 'PUT',
@@ -325,7 +330,7 @@ function ProfilePage() {
                     </button>
                     <h2>Edit Profile</h2>
                     <p className="subtitle">Update your information to find better matches</p>
-                    <form onSubmit={handleSave} className="profile-form">
+                    <form className="profile-form" onSubmit={handleSave}>
                         <div className="two-col">
                             <div className="form-group">
                                 <label htmlFor="firstName">First Name</label>

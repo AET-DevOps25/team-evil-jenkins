@@ -3,6 +3,8 @@ package userservice;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+
+import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.FetchType;
@@ -24,6 +26,7 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
+    
     @Column(name = "picture")
     private String picture;
 

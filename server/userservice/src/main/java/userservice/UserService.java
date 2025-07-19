@@ -41,7 +41,7 @@ public class UserService {
     }
 
     public boolean updateUser(String id, String firstName, String lastName, String bio, String skillLevel,
-            Map<String, List<String>> availability, List<String> sports) {
+            Map<String, List<String>> availability, List<String> sports, String picture) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null)
             return false;
@@ -61,6 +61,9 @@ public class UserService {
         }
         if (sports != null)
             user.setSportInterests(sports);
+        if (picture != null) {
+            user.setPicture(picture);
+        }
         userRepository.save(user);
         return true;
     }

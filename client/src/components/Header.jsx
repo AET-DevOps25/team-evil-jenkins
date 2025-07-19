@@ -1,10 +1,12 @@
 import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 import '../styles/LandingPage.css';
 
 const Header = () => {
     const { isAuthenticated, user, logout, loginWithRedirect } = useAuth0();
+    const navigate = useNavigate();
     const authNav = [
         { path: '/home', label: 'Home' },
         { path: '/matches', label: 'Matching' },
@@ -65,7 +67,8 @@ const Header = () => {
                                 style={{ width: 32, height: 32, borderRadius: '50%' }}
                                 onClick={() => navigate('/profile')}
                             />
-                        )}                        <button onClick={() => logout({ returnTo: window.location.origin })} className="btn btn-secondary">Log out</button>
+                        )} 
+                        <button onClick={() => logout({ logoutParams: { returnTo: window.location.origin + '/logout' } })} className="btn btn-secondary">Log out</button>
                     </div>
                 ) : (
                     <div className="auth-links">
