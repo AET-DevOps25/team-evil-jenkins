@@ -19,6 +19,20 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/nginx-gateway-configmap.yaml") . | sha256sum }}
     spec:
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - "8.8.8.8"
+          - "8.8.4.4"
+          - "1.1.1.1"
+        searches:
+          - "default.svc.cluster.local"
+          - "svc.cluster.local"
+          - "cluster.local"
+        options:
+          - name: ndots
+            value: "5"
+          - name: edns0
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -60,6 +74,9 @@ spec:
             - name: nginx-config
               mountPath: /etc/nginx/oidc.lua
               subPath: oidc.lua
+            - name: dns-config
+              mountPath: /etc/resolv.conf
+              subPath: resolv.conf
       volumes:
         - name: nginx-config
           configMap:
@@ -69,3 +86,9 @@ spec:
                 path: nginx.conf
               - key: oidc.lua
                 path: oidc.lua
+        - name: dns-config
+          configMap:
+            name: {{ include "team-evil-jenkins.fullname" . }}-dns-config
+            items:
+              - key: resolv.conf
+                path: resolv.conf
