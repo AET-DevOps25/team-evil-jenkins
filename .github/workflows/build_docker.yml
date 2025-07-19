@@ -113,7 +113,9 @@ jobs:
         working-directory: ./client
 
       - name: Build React app
-        run: npm run build
+        run: |
+          rm -rf ./client/dist
+          npm run build
         working-directory: ./client
 
       - name: Cache React build output
@@ -184,7 +186,7 @@ jobs:
   publish-docker-images:
 
     name: Build and publish Docker Images
-    needs: [java-build, build-react-frontend, genai-python-test]
+    needs: [java-build, genai-python-test]
     runs-on: ubuntu-latest
     strategy:
       matrix:
