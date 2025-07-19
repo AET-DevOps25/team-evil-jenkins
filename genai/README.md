@@ -31,10 +31,10 @@ docker compose up --build genai
 Request body:
 ```json
 {
-  "user_profile": "Sporty person who likes tennis",
+  "user_profile": {"id": "user1", "name": "user", "sportInterests": ["Tennis", "Swimming"], "bio": "I love tennis and swimming", "skillLevel": "Beginner"},
   "candidates": [
-    {"id": "u1", "name": "Bob", "sportInterests": ["Tennis", "Swimming"]},
-    {"id": "u2", "name": "Carol", "sportInterests": ["Chess", "Reading"]}
+    {"id": "u1", "name": "Bob", "sportInterests": ["Tennis", "Swimming"], "bio": "I love tennis and swimming", "skillLevel": "Beginner"},
+    {"id": "u2", "name": "Carol", "sportInterests": ["Chess", "Reading"], "bio": "I love chess and reading", "skillLevel": "Beginner"}
   ]
 }
 ```

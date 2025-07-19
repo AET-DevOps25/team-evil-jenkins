@@ -16,6 +16,8 @@ class Candidate(BaseModel):
     id: str = Field(..., description="Unique ID of the candidate user")
     name: str = Field(..., description="Name of the candidate user")
     sportInterests: list[str] = Field(..., description="List of sports the user is interested in")
+    bio: str = Field(..., description="Bio of the candidate user")
+    skillLevel: str = Field(..., description="Skill level of the candidate user")
 
 
 class MatchRequest(BaseModel):
