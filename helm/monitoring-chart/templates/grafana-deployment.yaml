@@ -12,6 +12,8 @@ spec:
       app.kubernetes.io/component: grafana
   template:
     metadata:
+      annotations:
+        redeploy-timestamp: "{{ .Values.redeploy | default (now | date "2006-01-02T15:04:05Z07:00") }}"
       labels:
         {{- include "monitoring-chart.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: grafana
