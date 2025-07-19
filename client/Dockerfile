@@ -9,3 +9,4 @@ RUN npm install -g serve@14
 
 EXPOSE 80
 CMD ["serve", "-s", "dist", "-l", "80"]
+#Small change to trigger building the client
