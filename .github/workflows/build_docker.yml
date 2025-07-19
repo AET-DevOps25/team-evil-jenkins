@@ -95,6 +95,7 @@ jobs:
 
   build-react-frontend:
     name: Build React Frontend
+    needs: changes
     if: needs.changes.outputs.client == 'true' 
     runs-on: ubuntu-latest
     steps:
