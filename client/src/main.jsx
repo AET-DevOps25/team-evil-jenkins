@@ -8,6 +8,12 @@ import { NotificationProvider } from './contexts/NotificationContext.jsx';
 import './styles/Notification.css';
 import App from './App.jsx';
 
+// Debug: Log environment variables
+console.log('VITE_AUTH0_DOMAIN:', import.meta.env.VITE_AUTH0_DOMAIN);
+console.log('VITE_AUTH0_CLIENT_ID:', import.meta.env.VITE_AUTH0_CLIENT_ID);
+console.log('VITE_AUTH0_AUDIENCE:', import.meta.env.VITE_AUTH0_AUDIENCE);
+console.log('All import.meta.env:', import.meta.env);
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Auth0Provider
