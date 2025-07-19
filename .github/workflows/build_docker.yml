@@ -118,7 +118,11 @@ jobs:
           cd ./client
           # This command builds the new dist directory
           npm run build
-        
+        env:
+          VITE_AUTH0_DOMAIN: ${{ vars.AUTH0_DOMAIN }}
+          VITE_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          VITE_AUTH0_AUDIENCE: ${{ vars.AUTH0_AUDIENCE }}
+
       - name: Upload React Build Artifact
         uses: actions/upload-artifact@v4
         with:
