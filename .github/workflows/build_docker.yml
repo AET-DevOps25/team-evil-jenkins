@@ -114,8 +114,12 @@ jobs:
 
       - name: Build React app
         run: |
+          cd ./client
+          echo "--- Switched to directory: $(pwd) ---"
           npm cache clean --force
-          rm -rf ./client/dist
+          echo "--- Cleaning old build directory ---"
+          rm -rf ./dist
+          echo "--- Starting build ---"
           npm run build
 
       - name: Cache React build output
