@@ -24,7 +24,10 @@ client:
     tag: latest 
   service:
     type: ClusterIP 
-    port: 80 
+    port: 80
+  podSecurityContext: {}
+  securityContext: {}
+  resources: {} 
 
 userService:
   replicaCount: 1
