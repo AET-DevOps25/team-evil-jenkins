@@ -93,7 +93,7 @@ jobs:
       - name: Run pytest
         run: PYTHONPATH=. pytest genai/tests
 
-build-react-frontend:
+  build-react-frontend:
     name: Build React Frontend
     needs: changes
     if: needs.changes.outputs.client == 'true'
