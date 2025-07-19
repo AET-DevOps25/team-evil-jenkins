@@ -21,12 +21,16 @@ spec:
         rollme: "{{ randAlphaNum 5 | quote }}"
     spec:
       serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
+      {{- with .Values.client.podSecurityContext }}
       securityContext:
-        {{- .Values.client.podSecurityContext | toYaml | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: client
+          {{- with .Values.client.securityContext }}
           securityContext:
-            {{- .Values.client.securityContext | toYaml | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.client.image.repository }}:{{ .Values.client.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
