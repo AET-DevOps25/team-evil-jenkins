@@ -26,10 +26,7 @@ const skillLevels = ['Beginner', 'Intermediate', 'Advanced'];
 // API URL configuration for different environments
 // Docker: Frontend on :3000, nginx gateway on :80
 // Kubernetes: Frontend and API on separate domains
-const API_URL = import.meta.env.VITE_API_URL ||
-    (window.location.hostname === 'localhost'
-        ? 'http://localhost:80'
-        : `https://api.${window.location.hostname}`);
+const API_URL = (window.location.hostname === 'localhost' ? 'http://localhost:80' : `https://api.${window.location.hostname}`);
 
 function ProfilePage() {
     const { user, getAccessTokenSilently } = useAuth0();
