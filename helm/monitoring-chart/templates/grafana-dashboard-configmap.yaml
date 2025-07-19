@@ -1,12 +1,12 @@
+{{- if .Values.grafana.dashboard.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "monitoring-chart.fullname" . }}-spring-boot-dashboard
+  name: {{ include "monitoring-chart.fullname" . }}-main-dashboard
   labels:
     {{- include "monitoring-chart.labels" . | nindent 4 }}
-    # This special label tells the Grafana sidecar to load this as a dashboard
     grafana_dashboard: "1"
 data:
-  # The filename here will be the name of the JSON file inside the container
   dashboard.json: |-
     {{- .Files.Get "dashboards/dashboard.json" | nindent 4 }}
+{{- end }}

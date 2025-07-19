@@ -1,0 +1,17 @@
+{{- if .Values.grafana.provisioning.notifiers.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "monitoring-chart.fullname" . }}-grafana-notifiers
+  labels:
+    {{- include "monitoring-chart.labels" . | nindent 4 }}
+    grafana_notifier: "1"
+data:
+  notifiers.yaml: |
+    # config file version
+    apiVersion: 1
+
+    # list of notifiers
+    notifiers:
+      {{- toYaml .Values.grafana.provisioning.notifiers.config | nindent 6 }}
+{{- end }}
