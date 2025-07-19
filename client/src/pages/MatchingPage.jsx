@@ -107,6 +107,8 @@ function MatchingPage() {
   const [location, setLocation] = useState('');
   const [matches, setMatches] = useState([]);
   const [matchingLoading, setMatchingLoading] = useState(false);
+  const [showExplanationModal, setShowExplanationModal] = useState(false);
+  const [selectedExplanation, setSelectedExplanation] = useState(null);
 
   // validation helpers and Match click handler
   const hasValidAvailability = (avl) => avl && Object.values(avl).some((arr) => Array.isArray(arr) && arr.length);
@@ -177,6 +179,16 @@ function MatchingPage() {
         setMatchingLoading(false);
       }
     })();
+  };
+
+  // Show explanation modal
+  const handleShowExplanation = (match) => {
+    setSelectedExplanation({
+      name: match.name,
+      explanation: match.explanation,
+      match: match.match
+    });
+    setShowExplanationModal(true);
   };
 
   // add contact and redirect to messages
@@ -353,7 +365,18 @@ function MatchingPage() {
                       ))}
                     </div>
                     <p className="shared">Shared interests: {m.shared}</p>
-                    <button className="btn btn-secondary full send" onClick={() => handleSendMessage(m)}>💬 Send Message</button>
+                    <div className="match-actions">
+                      {m.explanation && (
+                        <button 
+                          className="btn btn-outline explanation-btn" 
+                          onClick={() => handleShowExplanation(m)}
+                          title="See why you matched"
+                        >
+                          💡 See Explanation
+                        </button>
+                      )}
+                      <button className="btn btn-secondary send" onClick={() => handleSendMessage(m)}>💬 Send Message</button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -366,6 +389,41 @@ function MatchingPage() {
           <div className="map-placeholder card">Map view coming soon…</div>
         )}
       </section>
+
+      {/* Explanation Modal */}
+      {showExplanationModal && selectedExplanation && (
+        <div className="modal-overlay" onClick={() => setShowExplanationModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>💡 Match Explanation</h3>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowExplanationModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="match-info">
+                <h4>{selectedExplanation.name}</h4>
+                <span className="match-score">{selectedExplanation.match}% Match</span>
+              </div>
+              <div className="explanation-content">
+                <p>{selectedExplanation.explanation}</p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setShowExplanationModal(false)}
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

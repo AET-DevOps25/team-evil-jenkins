@@ -66,6 +66,7 @@ const MessagesPage = () => {
     const { notify } = useNotification();
     const stompClientRef = useRef(null);
     const subscriptionsRef = useRef(new Map());
+    const messagesEndRef = useRef(null);
 
     const selected = conversations.find((c) => c.id === selectedId);
 
@@ -74,6 +75,16 @@ const MessagesPage = () => {
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.last.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    // Auto-scroll to bottom function
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Auto-scroll when messages change or conversation changes
+    useEffect(() => {
+        scrollToBottom();
+    }, [selected?.messages, selectedId]);
 
     // WebSocket connection setup
     useEffect(() => {
@@ -353,6 +364,7 @@ const MessagesPage = () => {
                                         <span className="time">{m.time}</span>
                                     </div>
                                 ))}
+                                <div ref={messagesEndRef} />
                             </div>
 
                             <div className="message-input">
