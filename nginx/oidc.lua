@@ -15,14 +15,9 @@ local opts = {
   ssl_verify = "yes"
 }
 
--- Always set CORS headers so that browser receives them even on 401/403
-ngx.header["Access-Control-Allow-Origin"] = "*"
-ngx.header["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-ngx.header["Access-Control-Allow-Headers"] = "Authorization,Content-Type"
-
 -- Skip JWT validation for OPTIONS requests (CORS preflight)
+-- Note: CORS headers are handled by nginx config to avoid duplicates
 if ngx.var.request_method == "OPTIONS" then
-  ngx.header["Access-Control-Max-Age"] = "86400"
   ngx.status = 204
   return ngx.exit(204)
 end
