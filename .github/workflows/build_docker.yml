@@ -6,6 +6,24 @@ on:
     branches: [ "main" ]
 
 jobs:
+
+  changes:
+    name: Detect File Changes
+    runs-on: ubuntu-latest
+    outputs:
+      client: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check for changes in client directory
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: client/**
+
+
   java-build:
     name: Build ${{ matrix.service }}
     runs-on: ubuntu-latest
@@ -77,6 +95,8 @@ jobs:
 
   build-react-frontend:
     name: Build React Frontend
+    needs: changes
+    if: needs.changes.outputs.client == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -85,26 +105,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' 
+          node-version: '18'
           cache: 'npm'
           cache-dependency-path: ./client/package-lock.json
+
       - name: Install dependencies
         run: npm ci
         working-directory: ./client
 
       - name: Build React app
-        run: npm run build
-        working-directory: ./client
-
-      - name: Cache React build output
-        id: cache-react-build
-        uses: actions/cache@v4
-        with:
-          path: ./client/dist
-          key: ${{ runner.os }}-react-build-${{ hashFiles('client/src/**', 'client/public/**', 'client/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-react-build-
-
+        run: |
+          cd ./client
+          # This command builds the new dist directory
+          npm run build
+        
       - name: Upload React Build Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -112,18 +126,63 @@ jobs:
           path: ./client/dist
           retention-days: 1
 
+  publish-client-image:
+    name: Build and publish Client Docker Image
+    needs: build-react-frontend
+    if: always() && needs.build-react-frontend.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download React Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-client-build-artifact
+          path: ./client/dist
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/client
+          tags: |
+            type=sha,format=short
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
   publish-docker-images:
 
     name: Build and publish Docker Images
-    needs: [java-build, build-react-frontend, genai-python-test]
+    needs: [java-build, genai-python-test]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service_config:
-          - name: client          
-            path: ./client
-            is_client: true
-
           - name: location-service    
             path: ./server/locationservice
             jar_download_target_dir: server/locationservice/build/libs
