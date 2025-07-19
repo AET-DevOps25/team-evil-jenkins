@@ -18,7 +18,6 @@ spec:
         app.kubernetes.io/component: client
       annotations:
         redeploy-timestamp: "{{ .Values.redeploy | default "" }}"
-        rollme: "{{ randAlphaNum 5 | quote }}"
     spec:
       {{ with .Values.imagePullSecrets }}
       imagePullSecrets:
