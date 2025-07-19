@@ -8,7 +8,13 @@ import { useAuth0 } from '@auth0/auth0-react';
  */
 export default function useRegisterUser() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-    const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
+    // API URL configuration for different environments
+    // Docker: Frontend on :3000, nginx gateway on :80
+    // Kubernetes: Frontend and API on separate domains
+    const API_URL = import.meta.env.VITE_API_URL || 
+        (window.location.hostname === 'localhost' 
+            ? 'http://localhost:80' 
+            : `https://api.${window.location.hostname}`);
 
 
     useEffect(() => {
@@ -17,7 +23,7 @@ export default function useRegisterUser() {
         (async () => {
             try {
                 const token = await getAccessTokenSilently();
-                const res = await fetch(`${API}/user/`, {
+                const res = await fetch(`${API_URL}/user/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

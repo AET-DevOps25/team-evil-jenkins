@@ -62,7 +62,13 @@ const mockMatches = [
   },
 ];
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
+// API URL configuration for different environments
+// Docker: Frontend on :3000, nginx gateway on :80
+// Kubernetes: Frontend and API on separate domains
+const API_URL = import.meta.env.VITE_API_URL ||
+  (window.location.hostname === 'localhost'
+    ? 'http://localhost:80'
+    : `https://api.${window.location.hostname}`);
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // simple emoji map for popular sports
@@ -102,11 +108,14 @@ function MatchingPage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [location, setLocation] = useState('');
+  const [matches, setMatches] = useState([]);
+  const [matchingLoading, setMatchingLoading] = useState(false);
 
   // validation helpers and Match click handler
   const hasValidAvailability = (avl) => avl && Object.values(avl).some((arr) => Array.isArray(arr) && arr.length);
 
   const handleMatch = () => {
+    setMatchingLoading(true);
     if (!profile) {
       notify({ type: 'error', message: 'Profile data not loaded yet. Please wait a moment.' });
       return;
@@ -127,10 +136,72 @@ function MatchingPage() {
       notify({ type: 'error', message: 'Please specify your availability (at least one day and time slot).' });
       return;
     }
-    // all good – proceed to matching (placeholder)
-    // TODO: call match API once implemented
-    navigate('/matches');
+    // all good – fetch matches from backend
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        // trigger fresh matching run
+        const partnersRes = await fetch(`${API_URL}/matching/partners/${encodeURIComponent(user.sub)}`, {
+          method: 'POST',
+
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!partnersRes.ok) {
+          notify({ type: 'error', message: 'Failed to fetch partners' });
+          return;
+        }
+        const users = await partnersRes.json();
+        // fetch scores/history to get match percentage & explanation
+        const historyRes = await fetch(`${API_URL}/matching/history/${encodeURIComponent(user.sub)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        let history = [];
+        if (historyRes.ok) {
+          history = await historyRes.json();
+        }
+        const scoreMap = Object.fromEntries(history.map(h => [h.matchedUserId, h.score]));
+        const explanationMap = Object.fromEntries(history.map(h => [h.matchedUserId, h.explanation]));
+        const commonMap = Object.fromEntries(history.map(h => [h.matchedUserId, h.commonPreferences]));
+        const formatted = users.map(u => ({
+          id: u.id,
+          name: u.name,
+          distance: 0, // TODO backend distance
+          avatar: u.picture || '/images/default-avatar.png',
+          sports: u.sportInterests || [],
+          shared: commonMap[u.id]?.join(', ') || '',
+          match: scoreMap[u.id] ? Math.round(scoreMap[u.id] * 100) : 0,
+          explanation: explanationMap[u.id],
+        }));
+        setMatches(formatted);
+        setMatchingLoading(false);
+      } catch (e) {
+        console.error('match fetch failed', e);
+        notify({ type: 'error', message: 'Unable to retrieve matches. Try again later.' });
+        setMatchingLoading(false);
+      }
+    })();
   };
+
+  // add contact and redirect to messages
+  const handleSendMessage = async (match) => {
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(`${API_URL}/messaging/contact?userId=${encodeURIComponent(user.sub)}&contactId=${encodeURIComponent(match.id)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        notify({ type: 'success', message: `Contact ${match.name} added! You can now chat.` });
+        navigate('/messages');
+      } else {
+        notify({ type: 'error', message: 'Failed to add contact. Please try again.' });
+      }
+    } catch (err) {
+      console.error(err);
+      notify({ type: 'error', message: 'Failed to add contact.' });
+    }
+  };
+
   const [view, setView] = useState('cards');
 
   useEffect(() => {
@@ -139,7 +210,7 @@ function MatchingPage() {
       try {
         const token = await getAccessTokenSilently();
         // fetch profile
-        const res = await fetch(`${API}/user/${encodeURIComponent(user.sub)}`, {
+        const res = await fetch(`${API_URL}/user/${encodeURIComponent(user.sub)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -151,7 +222,7 @@ function MatchingPage() {
           });
         }
         // fetch location
-        const locRes = await fetch(`${API}/location/${encodeURIComponent(user.sub)}`, {
+        const locRes = await fetch(`${API_URL}/location/${encodeURIComponent(user.sub)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (locRes.ok) {
@@ -257,37 +328,43 @@ function MatchingPage() {
 
         {/* Matches list */}
         {view === 'cards' && (
-          <>
-            <div className="matches-header">
-              <h3>Top Matches for You</h3>
-              <button className="btn-link edit">⚙️ Edit Preferences</button>
+          matchingLoading ? (
+            <div className="match-loader">
+              <div className="spinner" />
+              <p>Finding your best matches…</p>
             </div>
-            <div className="match-grid">
-              {mockMatches.map((m) => (
-                <div key={m.id} className="match-card card">
-                  <div className="match-header">
-                    <img src={m.avatar} alt={m.name} className="avatar-sm" />
-                    <div>
-                      <h4>{m.name}</h4>
-                      <span className="distance">{m.distance} km away</span>
+          ) : (
+            <>
+              <div className="matches-header">
+                <h3>Top Matches for You</h3>
+                <button className="btn-link edit">⚙️ Edit Preferences</button>
+              </div>
+              <div className="match-grid">
+                {(matches.length ? matches : mockMatches).map((m) => (
+                  <div key={m.id} className="match-card card">
+                    <div className="match-header">
+                      <img src={m.avatar} alt={m.name} className="avatar-sm" />
+                      <div>
+                        <h4>{m.name}</h4>
+                        <span className="distance">{m.distance} km away</span>
+                      </div>
+                      <span className="badge">{m.match}% Match</span>
                     </div>
-                    <span className="badge">{m.match}% Match</span>
+                    <div className="sports-list">
+                      {m.sports.map((s) => (
+                        <span key={s} className="sport-chip">{s}</span>
+                      ))}
+                    </div>
+                    <p className="shared">Shared interests: {m.shared}</p>
+                    <button className="btn btn-secondary full send" onClick={() => handleSendMessage(m)}>💬 Send Message</button>
                   </div>
-                  <div className="sports-list">
-                    {m.sports.map((s) => (
-                      <span key={s} className="sport-chip">{s}</span>
-                    ))}
-                  </div>
-                  <p className="shared">Shared interests: {m.shared}</p>
-                  <button className="btn btn-secondary full send">💬 Send Message</button>
-                </div>
-              ))}
-            </div>
-            <div className="load-more-wrapper">
-              <button className="btn btn-outline">Load More Matches</button>
-            </div>
-          </>
-        )}
+                ))}
+              </div>
+              <div className="load-more-wrapper">
+                <button className="btn btn-outline" disabled={matchingLoading}>Load More Matches</button>
+              </div>
+            </>
+          ))}
         {view === 'map' && (
           <div className="map-placeholder card">Map view coming soon…</div>
         )}

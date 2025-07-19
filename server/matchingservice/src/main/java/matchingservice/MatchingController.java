@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @RequestMapping("/matching")
@@ -31,21 +32,21 @@ public class MatchingController {
 
     @Operation(summary = "Find best partners for given user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully found partners",
-                    content = @Content(schema = @Schema(implementation = UserDTO.class)))
+            @ApiResponse(responseCode = "200", description = "Successfully found partners", content = @Content(schema = @Schema(implementation = UserDTO.class)))
     })
     @PostMapping("/partners/{userId}")
-    public ResponseEntity<List<UserDTO>> findPartners(@Parameter(description = "ID of user requesting partner") @PathVariable String userId) {
+    public ResponseEntity<List<UserDTO>> findPartners(
+            @Parameter(description = "ID of user requesting partner") @PathVariable String userId) {
         return ResponseEntity.ok(matchingService.findPartners(userId));
     }
 
     @Operation(summary = "Get previous matches for user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = @Content(schema = @Schema(implementation = UserDTO.class)))
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserDTO.class)))
     })
     @GetMapping("/history/{userId}")
-    public ResponseEntity<List<MatcherDTO>> getMatches(@Parameter(description = "ID of user") @PathVariable String userId) {
+    public ResponseEntity<List<MatcherDTO>> getMatches(
+            @Parameter(description = "ID of user") @PathVariable String userId) {
         return ResponseEntity.ok(matchingService.getMatches(userId));
     }
 }
