@@ -23,7 +23,13 @@ const allSports = ['Hiking', 'Running', 'Cycling', 'Swimming', 'Tennis', 'Basket
 const otherSports = ['Soccer', 'Baseball', 'Skiing', 'Snowboarding', 'Skateboarding', 'Surfing', 'Rowing', 'Boxing', 'Martial Arts', 'Climbing', 'Golf', 'Dancing', 'Yoga', 'Pilates', 'CrossFit', 'Weightlifting', 'Badminton', 'Table Tennis', 'Horseback Riding', 'Fencing'];
 const skillLevels = ['Beginner', 'Intermediate', 'Advanced'];
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
+// API URL configuration for different environments
+// Docker: Frontend on :3000, nginx gateway on :80
+// Kubernetes: Frontend and API on separate domains
+const API_URL = import.meta.env.VITE_API_URL ||
+    (window.location.hostname === 'localhost'
+        ? 'http://localhost:80'
+        : `https://api.${window.location.hostname}`);
 
 function ProfilePage() {
     const { user, getAccessTokenSilently } = useAuth0();
@@ -57,7 +63,7 @@ function ProfilePage() {
         if (!user) return;
         try {
             const token = await getAccessTokenSilently();
-            const res = await fetch(`${API}/user/${encodeURIComponent(user.sub)}`, {
+            const res = await fetch(`${API_URL}/user/${encodeURIComponent(user.sub)}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) return;
@@ -96,7 +102,7 @@ function ProfilePage() {
         (async () => {
             try {
                 const token = await getAccessTokenSilently();
-                const res = await fetch(`${API}/user/${encodeURIComponent(user.sub)}`, {
+                const res = await fetch(`${API_URL}/user/${encodeURIComponent(user.sub)}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) return;
@@ -133,7 +139,7 @@ function ProfilePage() {
         (async () => {
             try {
                 const token = await getAccessTokenSilently();
-                const res = await fetch(`${API}/location/${encodeURIComponent(user.sub)}`, {
+                const res = await fetch(`${API_URL}/location/${encodeURIComponent(user.sub)}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -241,7 +247,7 @@ function ProfilePage() {
                 availability: form.availability,
                 sports: form.sports,
             };
-            const res = await fetch(`${API}/user/${user.sub}`, {
+            const res = await fetch(`${API_URL}/user/${user.sub}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -57,5 +57,19 @@ spec:
               service:
                 name: nginx-gateway
                 port:
+                  number: 80
+          - path: /messaging
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-gateway
+                port:
+                  number: 80
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-gateway
+                port:
                   number: 80        
 {{- end }}

@@ -21,7 +21,13 @@ export default function useUpdateLocation(intervalMs = 30_000) {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const { notify } = useNotification();
     const watchIdRef = useRef(null);
-    const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
+    // API URL configuration for different environments
+    // Docker: Frontend on :3000, nginx gateway on :80
+    // Kubernetes: Frontend and API on separate domains
+    const API_URL = import.meta.env.VITE_API_URL || 
+        (window.location.hostname === 'localhost' 
+            ? 'http://localhost:80' 
+            : `https://api.${window.location.hostname}`);
 
     useEffect(() => {
         if (!isAuthenticated || !user || !('geolocation' in navigator)) return;
@@ -41,7 +47,7 @@ export default function useUpdateLocation(intervalMs = 30_000) {
                 console.log('latitude', latitude);
                 console.log('longitude', longitude);
                 console.log('user.sub', user.sub);
-                await fetch(`${API}/location/update?${qs}`, {
+                const response = await fetch(`${API_URL}/location/update?${qs}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -78,5 +84,5 @@ export default function useUpdateLocation(intervalMs = 30_000) {
                 navigator.geolocation.clearWatch(watchIdRef.current);
             }
         };
-    }, [isAuthenticated, user, getAccessTokenSilently, intervalMs, API]);
+    }, [isAuthenticated, user, getAccessTokenSilently, intervalMs, API_URL]);
 }

@@ -62,7 +62,13 @@ const mockMatches = [
   },
 ];
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:80';
+// API URL configuration for different environments
+// Docker: Frontend on :3000, nginx gateway on :80
+// Kubernetes: Frontend and API on separate domains
+const API_URL = import.meta.env.VITE_API_URL ||
+  (window.location.hostname === 'localhost'
+    ? 'http://localhost:80'
+    : `https://api.${window.location.hostname}`);
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // simple emoji map for popular sports
@@ -135,8 +141,9 @@ function MatchingPage() {
       try {
         const token = await getAccessTokenSilently();
         // trigger fresh matching run
-        const partnersRes = await fetch(`${API}/matching/partners/${encodeURIComponent(user.sub)}`, {
+        const partnersRes = await fetch(`${API_URL}/matching/partners/${encodeURIComponent(user.sub)}`, {
           method: 'POST',
+
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!partnersRes.ok) {
@@ -145,7 +152,7 @@ function MatchingPage() {
         }
         const users = await partnersRes.json();
         // fetch scores/history to get match percentage & explanation
-        const historyRes = await fetch(`${API}/matching/history/${encodeURIComponent(user.sub)}`, {
+        const historyRes = await fetch(`${API_URL}/matching/history/${encodeURIComponent(user.sub)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         let history = [];
@@ -174,6 +181,27 @@ function MatchingPage() {
       }
     })();
   };
+
+  // add contact and redirect to messages
+  const handleSendMessage = async (match) => {
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(`${API_URL}/messaging/contact?userId=${encodeURIComponent(user.sub)}&contactId=${encodeURIComponent(match.id)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        notify({ type: 'success', message: `Contact ${match.name} added! You can now chat.` });
+        navigate('/messages');
+      } else {
+        notify({ type: 'error', message: 'Failed to add contact. Please try again.' });
+      }
+    } catch (err) {
+      console.error(err);
+      notify({ type: 'error', message: 'Failed to add contact.' });
+    }
+  };
+
   const [view, setView] = useState('cards');
 
   useEffect(() => {
@@ -182,7 +210,7 @@ function MatchingPage() {
       try {
         const token = await getAccessTokenSilently();
         // fetch profile
-        const res = await fetch(`${API}/user/${encodeURIComponent(user.sub)}`, {
+        const res = await fetch(`${API_URL}/user/${encodeURIComponent(user.sub)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -194,7 +222,7 @@ function MatchingPage() {
           });
         }
         // fetch location
-        const locRes = await fetch(`${API}/location/${encodeURIComponent(user.sub)}`, {
+        const locRes = await fetch(`${API_URL}/location/${encodeURIComponent(user.sub)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (locRes.ok) {
@@ -344,25 +372,5 @@ function MatchingPage() {
     </>
   );
 }
-
-// add contact and redirect to messages
-const handleSendMessage = async (match) => {
-  try {
-    const token = await getAccessTokenSilently();
-    const res = await fetch(`${API}/messaging/contact?userId=${encodeURIComponent(user.sub)}&contactId=${encodeURIComponent(match.id)}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      notify({ type: 'success', message: `Contact ${match.name} added! You can now chat.` });
-      navigate('/messages');
-    } else {
-      notify({ type: 'error', message: 'Failed to add contact. Please try again.' });
-    }
-  } catch (err) {
-    console.error(err);
-    notify({ type: 'error', message: 'Failed to add contact.' });
-  }
-};
 
 export default MatchingPage;
