@@ -16,6 +16,8 @@ spec:
       labels:
         {{- include "team-evil-jenkins.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: nginx-gateway
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/nginx-gateway-configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

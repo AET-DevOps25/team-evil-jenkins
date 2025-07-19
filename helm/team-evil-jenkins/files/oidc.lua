@@ -9,6 +9,13 @@ ngx.header["Access-Control-Allow-Origin"] = "*"
 ngx.header["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 ngx.header["Access-Control-Allow-Headers"] = "Authorization,Content-Type"
 
+-- Skip JWT validation for OPTIONS requests (CORS preflight)
+if ngx.var.request_method == "OPTIONS" then
+  ngx.header["Access-Control-Max-Age"] = "86400"
+  ngx.status = 204
+  return ngx.exit(204)
+end
+
 local opts = {
   discovery = string.format("https://%s/.well-known/openid-configuration", os.getenv("AUTH0_DOMAIN")),
   token_signing_alg_values_expected = {"RS256"},
