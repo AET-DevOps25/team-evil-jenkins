@@ -20,17 +20,13 @@ spec:
         redeploy-timestamp: "{{ .Values.redeploy | default "" }}"
         rollme: "{{ randAlphaNum 5 | quote }}"
     spec:
-      serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
-      {{- with .Values.client.podSecurityContext }}
-      securityContext:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "team-evil-jenkins.serviceAccountName" . }}
       containers:
         - name: client
-          {{- with .Values.client.securityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
           image: "{{ .Values.ghcr.registry }}/{{ .Values.ghcr.organization }}/{{ .Values.client.image.repository }}:{{ .Values.client.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
