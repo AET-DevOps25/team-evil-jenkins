@@ -114,9 +114,9 @@ jobs:
 
       - name: Build React app
         run: |
+          npm cache clean --force
           rm -rf ./client/dist
           npm run build
-        working-directory: ./client
 
       - name: Cache React build output
         id: cache-react-build
