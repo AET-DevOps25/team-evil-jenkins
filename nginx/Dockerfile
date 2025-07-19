@@ -9,5 +9,6 @@ RUN yum install -y epel-release && \
 
 # Copy Lua script for Auth0 validation (compose will mount nginx.conf)
 COPY oidc.lua /etc/nginx/oidc.lua
+COPY nginx.conf /etc/nginx/nginx.conf
 
 CMD ["nginx", "-g", "daemon off;"]
