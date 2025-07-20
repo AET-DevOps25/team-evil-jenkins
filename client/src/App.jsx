@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import LandingPage from './pages/LandingPage';
 import CallbackPage from './pages/CallbackPage.jsx';
+import LogoutPage from './pages/LogoutPage.jsx';
 import useUpdateLocation from './hooks/useUpdateLocation.js';
 import RequireAuth from './components/RequireAuth';
 import useRegisterUser from './hooks/useRegisterUser';
@@ -22,6 +23,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/callback" element={<CallbackPage />} />
+      <Route path="/logout" element={<LogoutPage />} />
       <Route path="/home" element={<Home />} />
       <Route path="/signin/" element={<SignInPage />} />
       <Route path="/signup/" element={<SignUpPage />} />

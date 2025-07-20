@@ -106,9 +106,51 @@ function MatchingPage() {
   const [profile, setProfile] = useState(null);
   const [location, setLocation] = useState('');
   const [matches, setMatches] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [showExplanationModal, setShowExplanationModal] = useState(false);
   const [selectedExplanation, setSelectedExplanation] = useState(null);
+
+  // Load previously stored matches on first mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const historyRes = await fetch(`${API_URL}/matching/history/${encodeURIComponent(user.sub)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (historyRes.ok) {
+          const history = await historyRes.json();
+          // Fetch user details for each matched user in parallel
+          const userDetailsArr = await Promise.all(history.map(h => 
+            fetch(`${API_URL}/user/${encodeURIComponent(h.matchedUserId)}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }).then(res => res.ok ? res.json() : null)
+          ));
+          const userMap = Object.fromEntries(userDetailsArr.filter(Boolean).map(u => [u.id, u]));
+
+          const formatted = history.map(h => {
+            const u = userMap[h.matchedUserId] || {};
+            return {
+              id: h.matchedUserId,
+              name: u.name || 'Unknown',
+              distance: 0,
+              avatar: u.picture || '/images/default-avatar.png',
+              sports: u.sportInterests || [],
+              shared: Array.isArray(h.commonPreferences) ? h.commonPreferences.join(', ') : '',
+              match: h.score ? Math.round(h.score * 100) : 0,
+              explanation: h.explanation,
+            };
+          });
+          setMatches(formatted);
+        }
+      } catch (e) {
+        console.warn('Failed to load match history', e);
+      } finally {
+        setLoadingHistory(false);
+      }
+    })();
+  }, []); // run once on mount
 
   // validation helpers and Match click handler
   const hasValidAvailability = (avl) => avl && Object.values(avl).some((arr) => Array.isArray(arr) && arr.length);
@@ -337,7 +379,7 @@ function MatchingPage() {
 
         {/* Matches list */}
         {view === 'cards' && (
-          matchingLoading ? (
+          (matchingLoading || loadingHistory) ? (
             <div className="match-loader">
               <div className="spinner" />
               <p>Finding your best matches…</p>
@@ -349,7 +391,7 @@ function MatchingPage() {
                 <button className="btn-link edit">⚙️ Edit Preferences</button>
               </div>
               <div className="match-grid">
-                {(matches.length ? matches : mockMatches).map((m) => (
+                {matches.map((m) => (
                   <div key={m.id} className="match-card card">
                     <div className="match-header">
                       <img src={m.avatar} alt={m.name} className="avatar-sm" />
