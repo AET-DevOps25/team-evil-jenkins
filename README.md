@@ -76,7 +76,13 @@ The system is built as a set of microservices:
 
 ---
 ## Microservices documentation
-[Server](server/README.md)s
+[Server](server/README.md)
+
+## Monitoring setup
+
+[Grafana](grafana/README.md).
+
+
 ## Local Development
 
 **Prerequisites:**
@@ -106,9 +112,11 @@ You only need to run this script after a fresh clone or when dependencies change
 For details on our centralized gateway (routing, JWT validation, CORS, WebSockets), see the dedicated [nginx/README.md](nginx/README.md).
 
 ---
+## Actions Pipeline
+
+[CI/CD setup](.github/workflows/README.md).
 
 ## Kubernetes & Cloud Deployment
-[CI/CD setup](.github/workflows/README.md).
 **Kubernetes (Helm):**
 - Prerequisites: `kubectl`, `helm`, AWS CLI (for cloud)
 - Deploy:
@@ -116,10 +124,6 @@ For details on our centralized gateway (routing, JWT validation, CORS, WebSocket
   helm upgrade --install team-evil-jenkins ./helm/team-evil-jenkins -n team-evil-jenkins
   ```
 - For AWS: see [`terraform/README.md`](terraform/README.md) 
-
-## Monitoring setup
-
-[Grafana](grafana/README.md).
 
 
 ### Helm Chart Structure & Deployment Process
