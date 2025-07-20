@@ -13,6 +13,8 @@ Beyond visual monitoring, this dashboard has a configured alert.
 
 Service Down Alert (up == 0): An essential alert to set up is for the up metric. Prometheus automatically generates an up metric for each configured scrape target, which has a value of 1 if the target is healthy (successfully scraped) and 0 if it's down or unreachable. An alert rule like up == 0 (or up == 0 for: 5m to reduce flapping) will trigger when a service becomes unavailable. This alert can be configured to send notifications via a Discord webhook, ensuring immediate visibility of service outages within your team's chat channels. This allows for rapid response and minimizes downtime.
 
+Exported alert rule you can find in the alert-rule.txt file
+
 The dashboard itself is logically organized into three main sections: **Key Performance Indicators (KPIs)**, **Request & Latency Analysis**, and **JVM & System Health**.
 
 ### Key Performance Indicators (All Services)
