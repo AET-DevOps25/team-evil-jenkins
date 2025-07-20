@@ -10,7 +10,6 @@ const Header = () => {
         { path: '/matches', label: 'Matching' },
         { path: '/profile', label: 'Profile' },
         { path: '/messages', label: 'Messages' },
-        { path: '/events', label: 'Events' }
     ];
 
     const guestNav = [

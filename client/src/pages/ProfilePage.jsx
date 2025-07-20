@@ -55,44 +55,6 @@ function ProfilePage() {
         }
     }, [user]);
 
-    // Helper to fetch profile from backend
-    const fetchProfile = async () => {
-        if (!user) return;
-        try {
-            const token = await getAccessTokenSilently();
-            const res = await fetch(`${API_URL}/user/${encodeURIComponent(user.sub)}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            const nameParts = (data.name || '').split(' ');
-            setForm(prev => {
-                const next = {
-                    ...prev,
-                    firstName: nameParts[0] || '',
-                    lastName: nameParts.slice(1).join(' '),
-                    email: data.email || prev.email,
-                    bio: data.bio || '',
-                    skillLevel: data.skillLevel || '',
-                    sports: data.sportInterests || [],
-                    availability: { ...initialState.availability, ...(data.availability || {}) },
-                    avatar: data.picture || prev.avatar,
-                };
-                setOriginal(next);
-                return next;
-            });
-            if (data.sportInterests) {
-                setExtraSports(() => {
-                    const extras = data.sportInterests.filter((s) => !allSports.includes(s));
-                    return extras;
-                });
-            }
-        } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error('Failed to fetch user profile', e);
-        }
-    };
-
     // fetch full profile from backend
     useEffect(() => {
         if (!user) return;
@@ -269,7 +231,7 @@ function ProfilePage() {
                 <aside className="profile-sidebar card">
                     <div className="avatar-wrapper">
                         <img src={form.avatar || '/images/avatar-profile.png'} alt="User avatar" className="avatar-lg" />
-                        <span className="status-badge" />
+                        {/*  <span className="status-badge" /> */}
                     </div>
                     <h3 className="user-name">{`${form.firstName} ${form.lastName}`}</h3>
                     <p className="location-text">{location.address || form.location}</p>

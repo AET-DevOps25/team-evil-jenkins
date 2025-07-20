@@ -39,7 +39,15 @@
 .avail-day .day{font-weight:600;color:var(--primary-text)}
 .avail-day .slot{background:#e0e7ff;color:#3730a3;padding:.25rem .7rem;border-radius:12px;font-size:.85rem}
 .matches-header h3{margin:0}
+.matches-subtitle{margin:0.5rem 0 0 0;color:var(--text-muted);font-size:0.9rem}
 .btn-link{background:none;border:none;color:var(--primary);cursor:pointer;font-size:.85rem}
+
+/* Empty history state */
+.empty-history{display:flex;justify-content:center;align-items:center;min-height:300px}
+.empty-state{text-align:center;max-width:400px;padding:2rem}
+.empty-state h3{color:var(--text-muted);margin-bottom:1rem;font-size:1.5rem}
+.empty-state p{color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6}
+.empty-icon{font-size:3rem;margin-bottom:1rem}
 
 .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2rem}
 .match-card{display:flex;flex-direction:column;gap:.75rem}

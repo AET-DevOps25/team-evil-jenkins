@@ -367,8 +367,8 @@ function MatchingPage() {
                     <p className="shared">Shared interests: {m.shared}</p>
                     <div className="match-actions">
                       {m.explanation && (
-                        <button 
-                          className="btn btn-outline explanation-btn" 
+                        <button
+                          className="btn btn-outline explanation-btn"
                           onClick={() => handleShowExplanation(m)}
                           title="See why you matched"
                         >
@@ -396,8 +396,8 @@ function MatchingPage() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>💡 Match Explanation</h3>
-              <button 
-                className="modal-close" 
+              <button
+                className="modal-close"
                 onClick={() => setShowExplanationModal(false)}
                 aria-label="Close"
               >
@@ -414,8 +414,8 @@ function MatchingPage() {
               </div>
             </div>
             <div className="modal-footer">
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 onClick={() => setShowExplanationModal(false)}
               >
                 Got it!
