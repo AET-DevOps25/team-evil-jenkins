@@ -67,17 +67,54 @@ Response:
 - The LLM is prompted to return only a strict JSON array of match objects.
 - All parsing and error handling is defensive to handle LLM quirks.
 
-  "candidates": [
-    {"id": "u1", "profile": "Tennis fan"},
-    {"id": "u2", "profile": "Chess lover"}
-  ]
-}
+### 6. Prompt Design & Data Model
+
+The matching prompt is carefully engineered to keep the LLM focused and to guarantee a parse-able response:
+
+1. **System Instruction** – establishes the LLM persona and output contract:
+   ```text
+   You are a matchmaking engine. Return ONLY a valid JSON array. Each element must have
+   id (string), score (float 0-1), explanation (string), common_preferences (string[]). No prose.
+   ```
+2. **User Section** – embeds the request payload as JSON (verbatim). We include:
+   - `user_profile` – full user object.
+   - `candidates` – **array of candidate objects** with all required fields (`id`, `name`, `sportInterests`, `bio`, `skillLevel`, `picture`).
+
+   This is rendered with triple back-ticks so the model treats it as code and does not re-format it.
+
+3. **Few-Shot Example** – a miniature example (one user + two candidates) with the **desired JSON answer**. This anchors the output schema and ordering.
+
+4. **Explicit Rules** – reiterated in bold: *"Return ONLY JSON – do NOT add markdown, explanations, or keys outside the schema."*
+
+**Why this works:**
+- The model sees the schema three times (system, example, rules), drastically reducing chances of hallucinated keys.
+- Using JSON in the prompt avoids the cost of re-serialising Python dataclasses and keeps typing explicit.
+
+### Internal Data Model (Pydantic)
+
+```mermaid
+classDiagram
+    class SkillLevel { <<Enum>> BEGINNER INTERMEDIATE ADVANCED }
+    class Candidate {
+      +string id
+      +string name
+      +string[] sportInterests
+      +string bio
+      +SkillLevel skillLevel
+      +Optional~string~ picture
+    }
+    class Match {
+      +string id
+      +float score
+      +string explanation
+      +string[] common_preferences
+    }
 ```
 
-Response:
-```json
-{"ranked_ids": ["u1", "u2"]}
-```
+- `extra = "forbid"` is **disabled** to tolerate future fields (e.g., avatar URLs) without breaking requests.
+- Validation happens **before** hitting the LLM so runtime errors never propagate downstream.
+- The returned JSON is validated against the `Match` model; if the LLM drifts, we retry with a harsher system prompt.
+
 
 ## Development
 - Main entrypoint: `app.py` (FastAPI)

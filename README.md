@@ -10,6 +10,7 @@ A platform to connect people for outdoor sports, featuring smart matching (GenAI
 - [Service Table](#service-table)
 - [Local Development](#local-development)
 - [Kubernetes & Cloud Deployment](#kubernetes--cloud-deployment)
+- [NGINX API Gateway](#nginx-api-gateway)
 
 
 ---
@@ -96,6 +97,12 @@ The `build-all.sh` script will automatically:
 - Start Docker Compose with all services
 
 You only need to run this script after a fresh clone or when dependencies change.
+
+---
+
+## NGINX API Gateway
+
+For details on our centralized gateway (routing, JWT validation, CORS, WebSockets), see the dedicated [nginx/README.md](nginx/README.md).
 
 ---
 
