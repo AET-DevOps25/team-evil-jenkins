@@ -1,257 +1,59 @@
+# ansible/playbook.yml
+# This playbook deploys the entire application stack using Docker Compose.
+
 ---
-- name: Deploy Microservices to EC2
-  hosts: all # This will target the host(s) defined in inventory.ini
-  become: yes # Most docker commands require sudo
-  vars:
-    # These variables will be passed from Terraform or defined in terraform.tfvars
-    # ghcr_username: "YOUR_GITHUB_USERNAME_VAR"
-    # ghcr_pat: "YOUR_GHCR_PAT_VAR"
-    client_image: "ghcr.io/aet-devops25/team-evil-jenkins/client:latest"
-    user_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/user-service:latest"
-    location_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/location-service:latest"
-    messaging_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/messaging-service:latest"
-    matching_service_image: "ghcr.io/aet-devops25/team-evil-jenkins/matching-service:latest"
-
-
+- hosts: webservers
+  become: yes
   tasks:
-    - name: Ensure Docker is active and enabled
-      ansible.builtin.service:
-        name: docker
-        state: started
-        enabled: yes
+    - name: "Wait for the server to be ready"
+      wait_for_connection:
+        timeout: 120
+        sleep: 10
 
-    - name: Create directory for env files
-      ansible.builtin.file:
-        path: /opt/env
+    - name: "Install Docker Compose"
+      shell: "curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose"
+      args:
+        # This ensures the command only runs if docker-compose isn't already installed
+        creates: /usr/local/bin/docker-compose
+
+    - name: "Create application directory on the server"
+      file:
+        path: /opt/app
         state: directory
         mode: '0755'
 
-    - name: Copy .env file to remote host
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../.env"
-        dest: /opt/env/.env
-        mode: '0644'
+    - name: "Copy docker-compose.yml to the server"
+      copy:
+        src: ./docker-compose.yml
+        dest: /opt/app/docker-compose.yml
 
-    - name: Deploy postgres.env file
-      ansible.builtin.copy:
-        dest: /opt/env/postgres.env
-        content: |
-          POSTGRES_USER=admin
-          POSTGRES_PASSWORD=your_secure_password
-        mode: '0644'
+    - name: "Copy configuration directories to the server"
+      copy:
+        src: ../{{ item }}
+        dest: /opt/app/
+      with_items:
+        - nginx
+        - prometheus
+        - grafana
+        - postgres
 
-    - name: Deploy postgres init.sql
-      ansible.builtin.copy:
-        dest: /opt/env/init.sql
-        content: |
-          CREATE DATABASE location_service_db;
-          CREATE DATABASE user_service_db;
-          CREATE DATABASE messaging_service_db;
-          CREATE DATABASE matching_service_db;
-        mode: '0644'
+    # ADDED: This task copies your .env file from the project root to the server.
+    # This is required by your docker-compose.yml file.
+    - name: "Copy .env file for environment variables"
+      copy:
+        src: ../.env
+        dest: /opt/app/.env
 
-    - name: Create directory for nginx config
-      ansible.builtin.file:
-        path: /opt/nginx
-        state: directory
-        mode: '0755'
+    - name: "Log in to GitHub Container Registry"
+      shell: "echo {{ ghcr_pat }} | docker login ghcr.io -u {{ ghcr_username }} --password-stdin"
+      no_log: true # Important: This prevents your token from appearing in logs
 
-    - name: Copy nginx.conf
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../nginx/nginx.conf"
-        dest: /opt/nginx/nginx.conf
-        mode: '0644'
-
-    - name: Copy oidc.lua
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../nginx/oidc.lua"
-        dest: /opt/nginx/oidc.lua
-        mode: '0644'
-
-    - name: Ensure microservices network exists
-      community.docker.docker_network:
-        name: micro_net
-    - name: Check that both env files exist
-      ansible.builtin.stat:
-        path: "{{ item }}"
-      loop:
-        - /opt/env/postgres.env
-        - /opt/env/.env
-      register: env_files_status
-
-    - name: Show env files status
-      ansible.builtin.debug:
-        var: env_files_status
-
-    - name: Log in to GitHub Container Registry
-      community.docker.docker_login:
-        registry_url: ghcr.io
-        username: "{{ ghcr_username }}"
-        password: "{{ ghcr_pat }}"
-      when: ghcr_username is defined and ghcr_pat is defined
-
-    - name: Pull client Docker image
-      community.docker.docker_image:
-        name: "{{ client_image }}"
-        source: pull
-
-    - name: Pull user-service Docker image
-      community.docker.docker_image:
-        name: "{{ user_service_image }}"
-        source: pull
-
-    - name: Pull location-service Docker image
-      community.docker.docker_image:
-        name: "{{ location_service_image }}"
-        source: pull
-
-    - name: Pull messaging-service Docker image
-      community.docker.docker_image:
-        name: "{{ messaging_service_image }}"
-        source: pull
-
-    - name: Pull matching-service Docker image
-      community.docker.docker_image:
-        name: "{{ matching_service_image }}"
-        source: pull
-
-    - name: Ensure postgres_data volume exists
-      community.docker.docker_volume:
-        name: postgres_data
-        state: present
-        driver: local
-
-    - name: Run postgres container
-      community.docker.docker_container:
-        name: postgres-service
-        image: postgres:15
-        state: started
-        restart_policy: always
-        env_file: /opt/env/postgres.env
-        volumes:
-          - postgres_data:/var/lib/postgresql/data
-        networks:
-          - name: micro_net
-        pull: yes
-
-    - name: Run genai container
-      community.docker.docker_container:
-        name: genai
-        image: ghcr.io/aet-devops25/team-evil-jenkins/genai:latest
-        state: started
-        restart_policy: always
-        ports:
-          - "8000:8000"
-        env_file: /opt/env/.env
-        networks:
-          - name: micro_net
-        pull: yes
-
-    - name: Run nginx-gateway container
-      community.docker.docker_container:
-        name: nginx-gateway
-        image: ghcr.io/aet-devops25/team-evil-jenkins/nginx-gateway:latest
-        state: started
-        restart_policy: always
-        ports:
-          - "80:80"
-        env_file: /opt/env/.env
-        volumes:
-          - /opt/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-          - /opt/nginx/oidc.lua:/etc/nginx/oidc.lua:ro
-        networks:
-          - name: micro_net
-        pull: yes
-     
-    
-
-    - name: Run client container
-      community.docker.docker_container:
-        name: client
-        image: "{{ client_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "3000:80"
-        networks:
-          - name: micro_net
-        pull: yes
-
-    - name: Run user-service container
-      community.docker.docker_container:
-        name: user-service
-        image: "{{ user_service_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "8080:8080"
-        env:
-          LOCATIONSERVICE_BASE_URL: http://location-service:8080
-          MESSAGINGSERVICE_BASE_URL: http://messaging-service:8080
-          SPRING_DATASOURCE_USERNAME: admin
-          SPRING_DATASOURCE_PASSWORD: your_secure_password
-          SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/user_service_db"
-          
-
-        env_file: /opt/env/.env
-        networks:
-          - name: micro_net
-        pull: yes
-
-    - name: Run location-service container
-      community.docker.docker_container:
-        name: location-service
-        image: "{{ location_service_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "8081:8080"
-        env:
-          USERSERVICE_BASE_URL: http://user-service:8080
-          SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/location_service_db"
-          SPRING_DATASOURCE_USERNAME: admin
-          SPRING_DATASOURCE_PASSWORD: your_secure_password
-          
-        env_file: /opt/env/.env
-        networks:
-          - name: micro_net
-        pull: yes
-
-    - name: Run messaging-service container
-      community.docker.docker_container:
-        name: messaging-service
-        image: "{{ messaging_service_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "8082:8080"
-        env:
-          USERSERVICE_BASE_URL: http://user-service:8080
-          SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/messaging_service_db"
-          SPRING_DATASOURCE_USERNAME: admin
-          SPRING_DATASOURCE_PASSWORD: your_secure_password
-        env_file: /opt/env/.env
-        networks:
-          - name: micro_net
-        pull: yes
-
-    - name: Run matching-service container
-      community.docker.docker_container:
-        name: matching-service
-        image: "{{ matching_service_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "8083:8080"
-        env:
-          USERSERVICE_BASE_URL: http://user-service:8080
-          LOCATIONSERVICE_BASE_URL: http://location-service:8080
-          MESSAGINGSERVICE_BASE_URL: http://messaging-service:8080
-          GENAISERVICE_BASE_URL: http://genai:8000
-          SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/matching_service_db"
-          SPRING_DATASOURCE_USERNAME: admin
-          SPRING_DATASOURCE_PASSWORD: your_secure_password
-        env_file: /opt/env/.env
-        networks:
-          - name: micro_net
-        pull: yes
+    - name: "Deploy application stack with Docker Compose"
+      # Using the full path to the docker-compose executable to avoid PATH issues.
+      shell: |
+        cd /opt/app
+        # Step 1: Pull the latest images from the registry to ensure we have the newest versions
+        /usr/local/bin/docker-compose pull
+        # Step 2: Start all services defined in docker-compose.yml in detached mode.
+        # --force-recreate ensures that containers are updated if their image has changed.
+        /usr/local/bin/docker-compose up -d --force-recreate
