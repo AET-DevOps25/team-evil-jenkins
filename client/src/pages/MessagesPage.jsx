@@ -219,7 +219,7 @@ const MessagesPage = () => {
                 const mapped = contacts.map((u) => ({
                     id: u.id,
                     name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.name || u.id,
-                    avatar: u.avatarUrl || '/images/avatar2.png',
+                    avatar: u.picture || '/images/avatar2.png',
                     last: '',
                     lastTime: '',
                     messages: [],
