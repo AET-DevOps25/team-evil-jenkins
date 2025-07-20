@@ -39,7 +39,6 @@ resource "aws_security_group" "web_sg" {
   description = "Allow SSH and web traffic for Docker Compose deployment"
   vpc_id      = var.vpc_id == "" ? data.aws_vpc.default.id : var.vpc_id
 
-  # ADDED: This lifecycle rule prevents dependency errors during updates.
   lifecycle {
     create_before_destroy = true
   }
@@ -118,13 +117,21 @@ resource "aws_instance" "web_server" {
   # This script prepares the server for Ansible
   user_data = <<-EOF
               #!/bin/bash
+              sudo systemctl stop httpd
+              sudo systemctl disable httpd
+
               sudo yum update -y
+              # Use amazon-linux-extras for a more reliable python install on AL2
+              sudo amazon-linux-extras install -y python3.8
+              sudo pip3.8 install "urllib3<2.0" requests docker
+              
               sudo amazon-linux-extras install docker -y
               sudo service docker start
               sudo usermod -a -G docker ec2-user
               sudo chkconfig docker on
-              sudo yum install -y python3.8 python3-pip
-              sudo pip3.8 install "urllib3<2.0" requests docker
+
+              # Create a flag file to signal completion
+              sudo touch /var/lib/cloud/instance/boot-finished
               EOF
 }
 
@@ -148,10 +155,17 @@ resource "null_resource" "ansible_provisioner" {
   # This provisioner runs the Ansible playbook to deploy the Docker Compose stack
   provisioner "local-exec" {
     command = <<-EOT
-      echo "Waiting for SSH on ${aws_instance.web_server.public_ip}..."
-      for i in {1..30}; do
-        nc -w 5 -z ${aws_instance.web_server.public_ip} 22 && break; sleep 10
+      # Wait for SSH to be ready
+      until nc -w 5 -z ${aws_instance.web_server.public_ip} 22; do
+          echo "Waiting for SSH..."
+          sleep 5
       done
+
+      until ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${var.ssh_private_key_path} ec2-user@${aws_instance.web_server.public_ip} '[ -f /var/lib/cloud/instance/boot-finished ]'; do
+          echo "Waiting for user_data to complete..."
+          sleep 10
+      done
+
       ansible-playbook -i ../ansible/inventory.ini ../ansible/playbook.yml --extra-vars "ghcr_username=${var.ghcr_username} ghcr_pat=${var.ghcr_pat}"
     EOT
   }

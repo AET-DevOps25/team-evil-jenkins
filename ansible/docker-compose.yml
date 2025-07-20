@@ -1,13 +1,6 @@
-# ansible/docker-compose.yml
-# This file is adapted for deployment on the EC2 instance.
-# It uses pre-built images from a container registry and secures networking.
-
-version: '3.8'
-
 services:
-  # --- Public-Facing Entry Point ---
   nginx:
-    image: nginx:latest
+    image: ghcr.io/aet-devops25/team-evil-jenkins/nginx-gateway:latest
     container_name: api-gateway
     ports:
       - "80:80"
@@ -27,9 +20,8 @@ services:
       - client
     restart: always
 
-  # --- Internal Backend Services (Not Exposed to the Internet) ---
   user-service:
-    image: ghcr.io/your-github-username/user-service:latest
+    image: ghcr.io/aet-devops25/team-evil-jenkins/user-service:latest
     environment:
       SPRING_PROFILES_ACTIVE: production
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_service_db
@@ -40,7 +32,7 @@ services:
     restart: always
 
   location-service:
-    image: ghcr.io/your-github-username/location-service:latest
+    image: ghcr.io/aet-devops25/team-evil-jenkins/location-service:latest
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/location_service_db
       SPRING_DATASOURCE_USERNAME: admin
@@ -50,7 +42,7 @@ services:
     restart: always
 
   messaging-service:
-    image: ghcr.io/your-github-username/messaging-service:latest
+    image: ghcr.io/aet-devops25/team-evil-jenkins/messaging-service:latest
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/messaging_service_db
       SPRING_DATASOURCE_USERNAME: admin
@@ -60,7 +52,7 @@ services:
     restart: always
 
   matching-service:
-    image: ghcr.io/your-github-username/matching-service:latest
+    image: ghcr.io/aet-devops25/team-evil-jenkins/matching-service:latest
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/matching_service_db
       SPRING_DATASOURCE_USERNAME: admin
@@ -70,7 +62,7 @@ services:
     restart: always
 
   client:
-    image: ghcr.io/your-github-username/client:latest
+    image: ghcr.io/aet-devops25/team-evil-jenkins/client:latest
     environment:
       VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
@@ -78,7 +70,7 @@ services:
     restart: always
 
   genai:
-    image: ghcr.io/your-github-username/genai:latest
+    image: ghcr.io/aet-devops25/team-evil-jenkins/genai:latest
     environment:
       OPENWEBUI_URL: ${OPENWEBUI_URL}
       OPENWEBUI_API_KEY: ${OPENWEBUI_API_KEY}
@@ -86,7 +78,6 @@ services:
       - matching-service
     restart: always
 
-  # --- Database Service (Internal Only) ---
   postgres:
     image: postgres:15
     volumes:
@@ -96,7 +87,6 @@ services:
       POSTGRES_PASSWORD: your_secure_password
     restart: always
 
-  # --- Optional Admin & Monitoring Tools (Exposed for your access) ---
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
