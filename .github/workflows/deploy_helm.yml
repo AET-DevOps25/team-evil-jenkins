@@ -1,4 +1,4 @@
-name: Deploy Manually to Kubernetes via Helm
+name: Deploy to Kubernetes via Helm
 
 on:
   workflow_run:

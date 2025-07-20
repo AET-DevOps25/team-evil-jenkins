@@ -1,4 +1,4 @@
-# Team Evil Jenkins
+# Sport Matcher
 
 A platform to connect people for outdoor sports, featuring smart matching (GenAI), messaging, and seamless deployment via Docker, Kubernetes, and AWS.
 
@@ -59,7 +59,7 @@ For more details and setup instructions, see the [GenAI service README](genai/RE
 
 ## Architecture
 
-The system is built as a set of microservices:
+The system is built as a set of loosely coupled microservices (see comprehensive class, component, and use-case diagrams in the [`uml/`](uml/) folder):
 
 | Service            | Technology Stack        | Port | Description                              |
 |--------------------|------------------------|------|------------------------------------------|
@@ -75,25 +75,38 @@ The system is built as a set of microservices:
 | prometheus         | Prometheus             | 9090 | Metrics collection and monitoring         |
 
 ---
-## Microservices documentation
-[Server](server/README.md)
+## Microservices Documentation
 
-## Monitoring setup
+For a detailed overview of every backend microservice, check the aggregated server documentation: [Server](server/README.md)
 
-[Grafana](grafana/README.md).
 
+---
+## Monitoring & Observability
+Our observability stack is based on **Prometheus** + **Grafana**.
+
+ **Prometheus** is deployed via Helm and auto-discovers Kubernetes pods using annotations in each Deployment manifest (`prometheus.io/scrape=true`).
+ open Grafana on `http://localhost:3001` (or the LoadBalancer URL in the cluster) and import JSON panels.  See the detailed setup guide in [`grafana/README.md`](grafana/README.md).
+
+---
 
 ## Local Development
 
 **Prerequisites:**
 - Docker & Docker Compose
 - (Optional) Node.js, Python, Java for local builds
+- Create a `.env` file (copy `.env.example`) and fill in the required secrets (Auth0, OpenWebUI) before running any build commands
 
 **Steps:**
 ```bash
 git clone https://github.com/AET-DevOps25/team-evil-jenkins.git
 cd team-evil-jenkins
-cp .env.example .env
+cp .env.example .env  # then open .env and fill in the following values:
+# OPENWEBUI_URL=
+# OPENWEBUI_API_KEY=
+# AUTH0_DOMAIN=
+# AUTH0_AUDIENCE=
+# AUTH0_CLIENT_ID=
+# AUTH0_CLIENT_SECRET=
 ./build-all.sh
 ```
 - Access frontend: http://localhost:3000
@@ -105,6 +118,8 @@ The `build-all.sh` script will automatically:
 
 You only need to run this script after a fresh clone or when dependencies change.
 
+
+
 ---
 
 ## NGINX API Gateway
@@ -114,7 +129,12 @@ For details on our centralized gateway (routing, JWT validation, CORS, WebSocket
 ---
 ## Actions Pipeline
 
-[CI/CD setup](.github/workflows/README.md).
+Our GitHub Actions workflow provides a zero-touch CI/CD path from push to production:
+
+1. **Build Docker Images** – on every push or pull-request, this job builds multi-arch images for all services and pushes them to GitHub Container Registry (GHCR).
+2. **Deploy to Kubernetes via Helm** – once the build job completes successfully on the `main` branch, a `workflow_run` trigger launches this job. It pulls the freshly built images and runs `helm upgrade --install`, using a base-64-encoded kubeconfig stored in repository secrets.
+
+Both workflows can also be executed manually from the Actions tab if needed. For YAML specifics, see the files in `.github/workflows/` or the aggregated [CI/CD setup guide](.github/workflows/README.md).
 
 ## Kubernetes & Cloud Deployment
 **Kubernetes (Helm):**
