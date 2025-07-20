@@ -177,7 +177,6 @@ __pycache__/
 
 # C extensions
 *.so
-*.sh
 # Distribution / packaging
 */bin/*
 .Python
