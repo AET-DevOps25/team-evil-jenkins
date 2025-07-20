@@ -10,7 +10,7 @@ This guide explains how to use the Terraform scripts in this directory to provis
 
 2.  **AWS Credentials**:
     *   Once your AWS Academy Lab is running, obtain your AWS access key ID, secret access key, and session token.
-    *   Configure your local AWS CLI with these credentials. The simplest way is to run `aws configure` and enter the details. Alternatively, you can set them as environment variables or update your `~/.aws/credentials` file.
+    *   Configure your local AWS CLI with these credentials. The simplest way is to run `aws configure` and enter the details. Alternatively, you can update your `~/.aws/credentials` file.
 
 3.  **Software Installation**:
     *   **Terraform**: Ensure Terraform is installed on your local machine. You can download it from the [official Terraform website](https://www.terraform.io/downloads.html).
