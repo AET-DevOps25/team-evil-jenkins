@@ -75,7 +75,8 @@ The system is built as a set of microservices:
 | prometheus         | Prometheus             | 9090 | Metrics collection and monitoring         |
 
 ---
-
+## Microservices documentation
+[Server](server/README.md)s
 ## Local Development
 
 **Prerequisites:**
@@ -107,7 +108,7 @@ For details on our centralized gateway (routing, JWT validation, CORS, WebSocket
 ---
 
 ## Kubernetes & Cloud Deployment
-
+[CI/CD setup](.github/workflows/README.md).
 **Kubernetes (Helm):**
 - Prerequisites: `kubectl`, `helm`, AWS CLI (for cloud)
 - Deploy:
@@ -115,6 +116,11 @@ For details on our centralized gateway (routing, JWT validation, CORS, WebSocket
   helm upgrade --install team-evil-jenkins ./helm/team-evil-jenkins -n team-evil-jenkins
   ```
 - For AWS: see [`terraform/README.md`](terraform/README.md) 
+
+## Monitoring setup
+
+[Grafana](grafana/README.md).
+
 
 ### Helm Chart Structure & Deployment Process
 
