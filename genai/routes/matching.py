@@ -1,7 +1,7 @@
 """FastAPI router exposing matchmaking endpoint for other services."""
 from __future__ import annotations
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -14,10 +14,13 @@ engine = MatchingEngine()
 
 class Candidate(BaseModel):
     id: str = Field(..., description="Unique ID of the candidate user")
-    name: str = Field(..., description="Name of the candidate user")
-    sportInterests: list[str] = Field(..., description="List of sports the user is interested in")
-    bio: str = Field(..., description="Bio of the candidate user")
-    skillLevel: str = Field(..., description="Skill level of the candidate user")
+    name: Optional[str] = Field(default="", description="Name of the candidate user")
+    sportInterests: List[str] = Field(default_factory=list, description="List of sports the user is interested in")
+    bio: Optional[str] = Field(default="", description="Bio of the candidate user")
+    skillLevel: Optional[str] = Field(default="", description="Skill level of the candidate user")
+
+    class Config:
+        extra = "allow"  # Accept unknown fields (e.g., picture) from backend
 
 
 class MatchRequest(BaseModel):

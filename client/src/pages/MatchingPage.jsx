@@ -106,15 +106,61 @@ function MatchingPage() {
   const [profile, setProfile] = useState(null);
   const [location, setLocation] = useState('');
   const [matches, setMatches] = useState([]);
+  const [allMatches, setAllMatches] = useState([]); // Store all fetched matches
+  const [displayedCount, setDisplayedCount] = useState(6); // Number of matches to display
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [showExplanationModal, setShowExplanationModal] = useState(false);
   const [selectedExplanation, setSelectedExplanation] = useState(null);
+
+  // Load previously stored matches on first mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const historyRes = await fetch(`${API_URL}/matching/history/${encodeURIComponent(user.sub)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (historyRes.ok) {
+          const history = await historyRes.json();
+          // Fetch user details for each matched user in parallel
+          const userDetailsArr = await Promise.all(history.map(h =>
+            fetch(`${API_URL}/user/${encodeURIComponent(h.matchedUserId)}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }).then(res => res.ok ? res.json() : null)
+          ));
+          const userMap = Object.fromEntries(userDetailsArr.filter(Boolean).map(u => [u.id, u]));
+
+          const formatted = history.map(h => {
+            const u = userMap[h.matchedUserId] || {};
+            return {
+              id: h.matchedUserId,
+              name: u.name || 'Unknown',
+              distance: 0,
+              avatar: u.picture || '/images/default-avatar.png',
+              sports: u.sportInterests || [],
+              shared: Array.isArray(h.commonPreferences) ? h.commonPreferences.join(', ') : '',
+              match: h.score ? Math.round(h.score * 100) : 0,
+              explanation: h.explanation,
+            };
+          });
+          setAllMatches(formatted);
+          setMatches(formatted.slice(0, 6)); // Show first 6 matches
+          setDisplayedCount(6);
+        }
+      } catch (e) {
+        console.warn('Failed to load match history', e);
+      } finally {
+        setLoadingHistory(false);
+      }
+    })();
+  }, []); // run once on mount
 
   // validation helpers and Match click handler
   const hasValidAvailability = (avl) => avl && Object.values(avl).some((arr) => Array.isArray(arr) && arr.length);
 
   const handleMatch = () => {
-    setMatchingLoading(true);
+
     if (!profile) {
       notify({ type: 'error', message: 'Profile data not loaded yet. Please wait a moment.' });
       return;
@@ -135,6 +181,7 @@ function MatchingPage() {
       notify({ type: 'error', message: 'Please specify your availability (at least one day and time slot).' });
       return;
     }
+    setMatchingLoading(true);
     // all good – fetch matches from backend
     (async () => {
       try {
@@ -171,7 +218,9 @@ function MatchingPage() {
           match: scoreMap[u.id] ? Math.round(scoreMap[u.id] * 100) : 0,
           explanation: explanationMap[u.id],
         }));
-        setMatches(formatted);
+        setAllMatches(formatted);
+        setMatches(formatted.slice(0, 6)); // Show first 6 matches
+        setDisplayedCount(6);
         setMatchingLoading(false);
       } catch (e) {
         console.error('match fetch failed', e);
@@ -179,6 +228,13 @@ function MatchingPage() {
         setMatchingLoading(false);
       }
     })();
+  };
+
+  // Load more matches (6 at a time)
+  const handleLoadMore = () => {
+    const newCount = displayedCount + 6;
+    setMatches(allMatches.slice(0, newCount));
+    setDisplayedCount(newCount);
   };
 
   // Show explanation modal
@@ -285,7 +341,7 @@ function MatchingPage() {
                 {location ? (
                   <span className="tag location" title={location}><span className="icon">📍</span> {location}</span>
                 ) : (
-                  <span className="text-muted">Unknown</span>
+                  <span className="text-muted">Unknown, please enable location sharing in your browser settings</span>
                 )}
               </div>
             </div>
@@ -298,7 +354,7 @@ function MatchingPage() {
                     <span key={s} className="tag selected">{getSportLabel(s)}</span>
                   ))
                 ) : (
-                  <span className="text-muted">None</span>
+                  <span className="badge skill">None</span>
                 )}
               </div>
             </div>
@@ -321,9 +377,11 @@ function MatchingPage() {
                       ))}
                     </div>
                   ))}
-                {!profile?.availability && (
-                  <span className="text-muted">Not set</span>
-                )}
+                {(!profile?.availability ||
+                  (profile?.availability && Object.entries(profile.availability)
+                    .filter(([, times]) => times.length).length === 0)) && (
+                    <span className="badge skill">None</span>
+                  )}
               </div>
             </div>
 
@@ -331,13 +389,13 @@ function MatchingPage() {
 
           <div className="actions">
 
-            <button className="btn btn-primary match-btn" onClick={handleMatch}>Match</button>
+            <button className="btn btn-primary match-btn" onClick={handleMatch}>Match me</button>
           </div>
         </div>
 
         {/* Matches list */}
         {view === 'cards' && (
-          matchingLoading ? (
+          (matchingLoading || loadingHistory) ? (
             <div className="match-loader">
               <div className="spinner" />
               <p>Finding your best matches…</p>
@@ -346,43 +404,79 @@ function MatchingPage() {
             <>
               <div className="matches-header">
                 <h3>Top Matches for You</h3>
-                <button className="btn-link edit">⚙️ Edit Preferences</button>
               </div>
-              <div className="match-grid">
-                {(matches.length ? matches : mockMatches).map((m) => (
-                  <div key={m.id} className="match-card card">
-                    <div className="match-header">
-                      <img src={m.avatar} alt={m.name} className="avatar-sm" />
-                      <div>
-                        <h4>{m.name}</h4>
-                        <span className="distance">{m.distance} km away</span>
-                      </div>
-                      <span className="badge">{m.match}% Match</span>
+              {allMatches.length === 0 ? (
+                <div className="empty-state card">
+                  <div className="empty-state-icon">
+                    🔍✨
+                  </div>
+                  <h3>Ready to Find Your Perfect Match?</h3>
+                  <p>Your fitness journey is about to get a lot more exciting! 🏃‍♂️💪</p>
+                  <div className="empty-state-features">
+                    <div className="feature-item">
+                      <span className="feature-icon">🎯</span>
+                      <span>AI-powered matching based on your interests</span>
                     </div>
-                    <div className="sports-list">
-                      {m.sports.map((s) => (
-                        <span key={s} className="sport-chip">{s}</span>
-                      ))}
+                    <div className="feature-item">
+                      <span className="feature-icon">📍</span>
+                      <span>Find partners near your location</span>
                     </div>
-                    <p className="shared">Shared interests: {m.shared}</p>
-                    <div className="match-actions">
-                      {m.explanation && (
-                        <button 
-                          className="btn btn-outline explanation-btn" 
-                          onClick={() => handleShowExplanation(m)}
-                          title="See why you matched"
-                        >
-                          💡 See Explanation
-                        </button>
-                      )}
-                      <button className="btn btn-secondary send" onClick={() => handleSendMessage(m)}>💬 Send Message</button>
+                    <div className="feature-item">
+                      <span className="feature-icon">⚡</span>
+                      <span>Connect with people at your skill level</span>
                     </div>
                   </div>
-                ))}
-              </div>
-              <div className="load-more-wrapper">
-                <button className="btn btn-outline" disabled={matchingLoading}>Load More Matches</button>
-              </div>
+                  <div className="empty-state-cta">
+                    <p>Click <strong>"Match me"</strong> above to discover amazing fitness partners!</p>
+                    <div className="cta-arrow">👆</div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="match-grid">
+                    {matches.map((m) => (
+                      <div key={m.id} className="match-card card">
+                        <div className="match-header">
+                          <img src={m.avatar} alt={m.name} className="avatar-sm" />
+                          <div>
+                            <h4>{m.name}</h4>
+                          </div>
+                          <span className="badge">{m.match}% Match</span>
+                        </div>
+                        <div className="sports-list">
+                          {m.sports.map((s) => (
+                            <span key={s} className="sport-chip">{s}</span>
+                          ))}
+                        </div>
+                        <p className="shared">Shared interests: {m.shared}</p>
+                        <div className="match-actions">
+                          {m.explanation && (
+                            <button
+                              className="btn btn-outline explanation-btn"
+                              onClick={() => handleShowExplanation(m)}
+                              title="See why you matched"
+                            >
+                              💡 See Explanation
+                            </button>
+                          )}
+                          <button className="btn btn-secondary send" onClick={() => handleSendMessage(m)}>💬 Send Message</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {displayedCount < allMatches.length && (
+                    <div className="load-more-wrapper">
+                      <button
+                        className="btn btn-outline"
+                        onClick={handleLoadMore}
+                        disabled={matchingLoading}
+                      >
+                        Load More Matches ({Math.min(6, allMatches.length - displayedCount)} more)
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           ))}
         {view === 'map' && (
@@ -396,8 +490,8 @@ function MatchingPage() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>💡 Match Explanation</h3>
-              <button 
-                className="modal-close" 
+              <button
+                className="modal-close"
                 onClick={() => setShowExplanationModal(false)}
                 aria-label="Close"
               >
@@ -414,8 +508,8 @@ function MatchingPage() {
               </div>
             </div>
             <div className="modal-footer">
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 onClick={() => setShowExplanationModal(false)}
               >
                 Got it!
